@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#7c5cff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Math Quest">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="icon" href="icon-192.png">
+<title>Math Quest</title>
+<style>
+:root{--ink:#2b2350;--soft:#6b6390;--good:#22b573;--bad:#ff6b6b;--gold:#ffbf1f;--purple:#7c5cff;--sh:0 6px 0 rgba(43,35,80,.18);
+  --bg:linear-gradient(160deg,#fff6e0,#ffe3f1)}
+body.t-ocean{--bg:linear-gradient(160deg,#d8f3ff,#c9e8ff 50%,#e0fff6)}
+body.t-space{--bg:radial-gradient(circle at 20% 20%,#3b2c7a,#14102e 70%)}
+body.t-candy{--bg:linear-gradient(160deg,#ffd6f0,#e6d6ff 50%,#d6fff2)}
+body.t-space h1,body.t-space .topbar h2,body.t-space h3{color:#fff}
+body.t-jungle{--bg:linear-gradient(160deg,#e3ffd0,#c2f0c2 50%,#fff4c2)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{font-family:"Segoe UI Rounded","Nunito","Avenir Next Rounded","Trebuchet MS","Segoe UI",system-ui,sans-serif;color:var(--ink);
+  background:var(--bg);background-attachment:fixed;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+button{font:inherit;color:inherit;cursor:pointer;border:none;touch-action:manipulation}
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:max(12px,env(safe-area-inset-top)) 12px max(16px,env(safe-area-inset-bottom))}
+.screen.active{display:flex}
+h1{font-size:clamp(36px,7vw,58px);margin:6px 0} h2{font-size:clamp(22px,4vw,30px);margin:6px 0} h3{margin:8px 0}
+.big-btn{background:var(--purple);color:#fff;font-size:clamp(20px,3.5vw,28px);font-weight:800;padding:14px 30px;border-radius:22px;box-shadow:var(--sh)}
+.big-btn:active,.key:active,.choice:active,.lvl:active,.small-btn:active{transform:translateY(4px);box-shadow:0 2px 0 rgba(43,35,80,.18)}
+.big-btn.green{background:var(--good)} .big-btn.gold{background:var(--gold);color:var(--ink)} .big-btn.gray{background:#e3e0f3;color:var(--ink)}
+.small-btn{background:#fff;border-radius:14px;padding:8px 12px;font-size:17px;font-weight:800;box-shadow:0 4px 0 rgba(43,35,80,.15);white-space:nowrap}
+.card{background:#fff;border-radius:28px;box-shadow:0 10px 30px rgba(43,35,80,.12);padding:18px}
+.pill{background:#fff;border-radius:999px;padding:7px 14px;font-weight:800;font-size:18px;box-shadow:0 4px 0 rgba(43,35,80,.12);white-space:nowrap}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+.topbar{width:100%;max-width:1100px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.name-input{font:inherit;font-size:28px;padding:10px 16px;border-radius:18px;border:4px solid #e3ddff;text-align:center;width:min(340px,80vw);outline:none;user-select:text;-webkit-user-select:text}
+.bob{animation:bob 2s ease-in-out infinite;display:inline-block}
+@keyframes bob{50%{transform:translateY(-10px) rotate(-4deg)}}
+.pick{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:8px 0}
+.pick button{font-size:44px;width:76px;height:76px;border-radius:50%;background:#fff;box-shadow:0 4px 0 rgba(43,35,80,.15)}
+.pick button.sel{outline:5px solid var(--purple)}
+.hero-av{width:1.3em;height:1.3em;vertical-align:middle;display:inline-block}
+.pick button .hero-av{width:64px;height:64px}
+/* map */
+.pet-panel{display:flex;align-items:center;gap:14px;background:#fff;border-radius:26px;padding:10px 18px;box-shadow:var(--sh);margin-top:10px;max-width:1100px;width:100%}
+.pet{font-size:64px;position:relative;display:inline-block;line-height:1}
+.pet .acc{position:absolute;font-size:30px;right:-12px;top:-10px}
+.pet.legend::after{content:"✨";position:absolute;left:-14px;bottom:-4px;font-size:28px;animation:bob 1.5s infinite}
+.xpbar{height:16px;background:#eee;border-radius:8px;overflow:hidden;width:min(260px,50vw)}
+.xpbar div{height:100%;background:linear-gradient(90deg,#7c5cff,#ff7ccf);transition:width .5s}
+.world{width:100%;max-width:1100px;border-radius:30px;padding:14px 16px;margin:10px 0;box-shadow:0 8px 0 rgba(43,35,80,.12)}
+.world h3{margin:0;font-size:24px} .world .story{font-size:16px;font-weight:600;color:var(--soft);margin:2px 0 10px}
+.levels{display:flex;flex-wrap:wrap;gap:12px}
+.lvl{width:108px;height:112px;border-radius:24px;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:var(--sh);position:relative;padding:4px}
+.lvl .e{font-size:36px} .lvl .n{font-size:13px;font-weight:800;text-align:center;line-height:1.1}
+.lvl .s{font-size:15px;color:#e0a100;letter-spacing:1px}
+.lvl.locked{background:#e8e5f3;opacity:.65} .lvl.boss{background:linear-gradient(160deg,#fff,#ffd9d9)}
+.lvl.next{animation:pulse 1.2s infinite;outline:4px solid var(--gold)}
+@keyframes pulse{50%{transform:scale(1.07)}}
+.world.lockedw{filter:grayscale(.6);opacity:.8}
+.wchips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+.wchips button{border-radius:999px;padding:6px 14px;font-weight:800;font-size:16px;box-shadow:0 3px 0 rgba(43,35,80,.15)}
+.prow{display:flex;align-items:center;gap:10px;margin:6px 0;font-weight:800}
+.pbar{flex:1;height:20px;background:#eee;border-radius:10px;overflow:hidden} .pbar div{height:100%;background:linear-gradient(90deg,#ffbf1f,#ff7ccf)}
+.days{display:flex;gap:10px;align-items:flex-end;height:150px;padding-top:10px}
+.days .d{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;font-size:13px;font-weight:800;height:100%}
+.days .d div{width:34px;background:linear-gradient(#7c5cff,#b19cff);border-radius:8px 8px 4px 4px;min-height:4px}
+/* play */
+.progress{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+.dot{width:16px;height:16px;border-radius:50%;background:#e3ddff}
+.dot.ok{background:var(--good)} .dot.miss{background:var(--gold)} .dot.cur{background:var(--purple);transform:scale(1.25)}
+.stage{width:100%;max-width:1060px;display:flex;gap:16px;align-items:stretch;margin-top:10px;flex-wrap:wrap;justify-content:center}
+.qcard{flex:1 1 560px;min-height:400px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;position:relative;padding-top:48px}
+.qtext{font-size:clamp(30px,5.5vw,46px);font-weight:900;text-align:center;line-height:1.2;white-space:pre-line}
+.qtext.word{font-size:clamp(20px,3.4vw,27px);font-weight:700;max-width:640px}
+.answer-box{min-width:140px;height:80px;border-radius:20px;border:5px dashed #c9c0ff;font-size:50px;font-weight:900;display:flex;align-items:center;justify-content:center;padding:0 16px;background:#faf8ff}
+.ok-glow{border-color:var(--good)!important;background:#e8fff3!important} .bad-shake{border-color:var(--bad)!important;background:#fff0f0!important;animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.pad{flex:0 1 300px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-content:center}
+.key{height:76px;border-radius:20px;background:#fff;font-size:34px;font-weight:900;box-shadow:var(--sh)}
+.key.go{background:var(--good);color:#fff} .key.del{background:#ffe1e1}
+.choices{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+.choice{min-width:100px;height:96px;padding:0 18px;border-radius:24px;background:#fff;font-size:50px;font-weight:900;box-shadow:var(--sh);border:4px solid #eee}
+.hint{background:#fff7d6;border-radius:20px;padding:12px 16px;font-size:clamp(17px,2.6vw,21px);font-weight:700;max-width:680px;text-align:center;display:none}
+.hint.show{display:block}
+.hint .hv{margin-top:8px;display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
+.qtools{position:absolute;top:10px;right:10px;display:flex;gap:8px}
+.qtools button{font-size:24px;background:#f1edff;border-radius:50%;width:48px;height:48px}
+.buddy{position:absolute;top:6px;left:12px;font-size:44px;transition:transform .2s}
+.buddy.jump{animation:jump .6s}
+@keyframes jump{40%{transform:translateY(-26px) rotate(12deg) scale(1.2)}}
+/* visuals */
+.visual{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-items:center;max-width:100%}
+.tf{display:grid;grid-template-columns:repeat(5,40px);gap:5px;padding:6px;background:#f1edff;border-radius:12px}
+.tf div{width:40px;height:40px;border-radius:10px;background:#fff;position:relative}
+.tf .a{background:#ff8fb1} .tf .b{background:#7cc6ff}
+.tf .x::after{content:"✕";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#7a1f1f;font-size:30px;font-weight:900}
+.bond{position:relative;width:240px;height:160px}
+.bond .c{position:absolute;width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:900;border:5px solid var(--purple);background:#fff}
+.bond svg{position:absolute;inset:0}
+.group{background:#f1edff;border-radius:50%;width:112px;height:112px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;align-content:center;font-size:24px;padding:12px;
+  box-shadow:inset 0 -6px 0 rgba(43,35,80,.08),0 0 0 6px #fff,0 0 0 9px #d9d2ff}
+.array{display:grid;gap:4px;font-size:28px}
+.blocks{display:flex;gap:5px;align-items:flex-end}
+.rod{width:14px;height:100px;background:repeating-linear-gradient(#4fb3ff 0 9px,#2a8fe0 9px 10px);border-radius:3px}
+.cubes{display:flex;flex-wrap:wrap;width:34px;align-content:flex-end;gap:2px}
+.cube{width:14px;height:14px;background:#ffb02e;border-radius:3px}
+.mart{display:flex;gap:4px;align-items:center}
+.mart .r{width:14px;height:34px;background:#3b4bd8;border-radius:2px}
+.mart .d{width:10px;height:10px;background:#3b4bd8;border-radius:50%}
+.mart .dots{display:grid;grid-template-columns:repeat(3,10px);gap:3px}
+.coin{width:52px;height:52px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;margin:2px;box-shadow:inset 0 -4px 0 rgba(0,0,0,.15)}
+.coin.dime{background:#dfe4ea;border:3px solid #aab3bd} .coin.penny{background:#e8a06a;border:3px solid #b8693a;width:42px;height:42px;font-size:14px}
+.col{display:inline-grid;gap:4px;font-size:40px;font-weight:900;background:#f6f4ff;border-radius:16px;padding:10px 14px}
+.col .cell{width:52px;height:56px;display:flex;align-items:center;justify-content:center}
+.col .carry{height:26px;font-size:20px;color:var(--purple)}
+.col .ans{border:4px solid #c9c0ff;border-radius:12px;background:#fff}
+.col .ans.focus{border-color:var(--purple);box-shadow:0 0 0 4px #e6dfff}
+.col .miss{border:4px dashed var(--gold);border-radius:12px;background:#fff8e0}
+.col .line{grid-column:1/-1;height:4px;background:var(--ink);border-radius:2px}
+/* boss */
+.boss{display:flex;align-items:center;gap:12px}
+.boss .m{font-size:70px}
+.boss .m.hit{animation:hit .45s}
+@keyframes hit{30%{transform:scale(.75) rotate(-18deg);filter:brightness(2.2)}}
+.hp{width:min(230px,45vw);height:20px;background:#ffe1e1;border-radius:999px;overflow:hidden;border:3px solid #fff}
+.hp div{height:100%;background:linear-gradient(90deg,#ff6b6b,#ff9a5a);transition:width .3s}
+.fly{position:fixed;font-size:46px;z-index:25;pointer-events:none;transition:all .45s ease-in}
+/* fx */
+.toast{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%) scale(.6);font-size:clamp(40px,8vw,64px);font-weight:900;color:#fff;
+  text-shadow:0 4px 0 rgba(0,0,0,.25),0 0 18px rgba(0,0,0,.15);opacity:0;pointer-events:none;transition:all .25s;z-index:20;white-space:nowrap}
+.toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.confetti{position:fixed;top:-30px;font-size:26px;z-index:30;pointer-events:none;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(112vh) rotate(720deg)}}
+.stars{font-size:clamp(60px,12vw,88px);letter-spacing:8px}
+.stars span{display:inline-block;opacity:.2;transform:scale(.5);transition:all .4s}
+.stars span.on{opacity:1;transform:scale(1)}
+.sticker-big{font-size:100px;animation:bob 1.6s infinite}
+.grid-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:12px;width:100%;max-width:900px}
+.grid-items>div{background:#fff;border-radius:20px;min-height:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:48px;box-shadow:0 4px 0 rgba(43,35,80,.12);padding:6px}
+.grid-items>div.empty{background:#eeeaf8;font-size:30px;color:#bbb}
+.grid-items small{font-size:14px;font-weight:800}
+table{border-collapse:collapse;width:100%;font-size:17px} td,th{padding:7px 8px;border-bottom:1px solid #eee;text-align:left}
+.bar{height:14px;background:#eee;border-radius:7px;overflow:hidden;width:120px} .bar div{height:100%}
+.modal{position:fixed;inset:0;background:rgba(43,35,80,.5);display:none;align-items:center;justify-content:center;z-index:40;padding:16px}
+.modal.show{display:flex}
+.lesson-vis{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:center;margin:8px 0}
+textarea{width:100%;height:80px;font-size:12px;border-radius:12px;border:2px solid #ddd;padding:8px;user-select:text;-webkit-user-select:text}
+@media (max-width:900px){
+  .pad{flex:1 1 100%;max-width:520px;grid-template-columns:repeat(6,1fr)}
+  .key{height:60px;font-size:28px;border-radius:16px}
+  .qcard{min-height:300px;flex-basis:100%}
+  .lvl{width:92px;height:100px} .lvl .e{font-size:30px}
+}
+@media (max-width:520px){ .pad{grid-template-columns:repeat(4,1fr)} .col{font-size:32px} .col .cell{width:42px;height:48px} .tf{grid-template-columns:repeat(5,30px)} .tf div{width:30px;height:30px} }
+</style>
+</head>
+<body>
+
+<!-- FAMILY CODE -->
+<section class="screen" id="lock" style="justify-content:center">
+  <div class="card" style="text-align:center;max-width:420px">
+    <div style="font-size:70px">🔐</div>
+    <h2>Family code</h2>
+    <p style="font-weight:600;color:var(--soft)">Ask a grown-up to type the family code.</p>
+    <input class="name-input" id="codeIn" autocomplete="off" autocapitalize="characters">
+    <div style="margin-top:12px"><button class="big-btn green" id="codeBtn">Unlock</button></div>
+  </div>
+</section>
+
+<!-- WELCOME -->
+<section class="screen" id="welcome">
+  <div class="row" style="font-size:90px"><span class="bob">🦉</span><span id="welcomeHero" style="font-size:120px"></span></div>
+  <h1>Math Quest</h1>
+  <div class="card" style="display:flex;flex-direction:column;align-items:center;gap:6px;max-width:640px">
+    <h2>Hi! I'm Pip. What's your name?</h2>
+    <input class="name-input" id="nameInput" maxlength="14" placeholder="Your name">
+    <h2 style="font-size:22px;margin-top:8px">Pick your hero</h2>
+    <div class="pick" id="avatarPick"></div>
+    <h2 style="font-size:22px;margin-top:4px">Pick a magic egg 🥚 — it hatches when you do math!</h2>
+    <div class="pick" id="petPick"></div>
+    <input class="name-input" id="petName" maxlength="12" placeholder="Name your pet" style="font-size:22px">
+    <button class="big-btn green" id="startBtn" style="margin-top:8px">Let's go! ▶</button>
+  </div>
+</section>
+
+<!-- MAP -->
+<section class="screen" id="map">
+  <div class="topbar">
+    <div class="pill" id="mapHero"></div>
+    <div class="row">
+      <div class="pill" id="mapCoins"></div>
+      <div class="pill" id="mapStars"></div>
+      <button class="small-btn" id="chestBtn">🎁 Daily chest!</button>
+      <button class="small-btn" id="practiceBtn">💪 Power-up</button>
+      <button class="small-btn" id="shopBtn">🛍️ Shop</button>
+      <button class="small-btn" id="progressBtn">📈 My progress</button>
+      <button class="small-btn" id="stickersBtn">📒 Stickers</button>
+      <button class="small-btn" id="musicBtn">🎵</button>
+      <button class="small-btn" id="soundBtn">🔊</button>
+      <button class="small-btn" id="parentBtn">👪</button>
+    </div>
+  </div>
+  <div class="pet-panel">
+    <div class="pet" id="mapPet"></div>
+    <div style="flex:1">
+      <div style="font-weight:900;font-size:20px" id="petTitle"></div>
+      <div class="xpbar"><div id="xpFill"></div></div>
+      <div style="font-size:15px;font-weight:700;color:var(--soft)" id="petNext"></div>
+    </div>
+    <div style="text-align:right"><div style="font-size:14px;font-weight:800;color:var(--soft)">RANK</div><div style="font-size:22px;font-weight:900" id="rank"></div></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:19px;font-weight:700;background:#fff;border-radius:20px;padding:4px 16px 4px 8px;box-shadow:0 4px 0 rgba(43,35,80,.12)"><span style="font-size:40px">🦉</span><span id="mapSay"></span></div>
+  <div class="wchips" id="wchips"></div>
+  <div id="worlds" style="width:100%;display:flex;flex-direction:column;align-items:center"></div>
+</section>
+
+<!-- LESSON -->
+<section class="screen" id="lesson" style="justify-content:center">
+  <div class="card" style="text-align:center;max-width:720px;width:100%">
+    <div style="font-size:16px;font-weight:800;color:var(--purple)">PIP'S QUICK LESSON 🦉</div>
+    <h2 id="lsTitle"></h2>
+    <div class="lesson-vis" id="lsVis"></div>
+    <div style="font-size:clamp(18px,3vw,23px);font-weight:700;line-height:1.4" id="lsText"></div>
+    <div class="row" style="margin-top:14px"><button class="small-btn" id="lsSay">🔊 Read it</button><button class="big-btn green" id="lsGo">I get it! ▶</button></div>
+  </div>
+</section>
+
+<!-- PLAY -->
+<section class="screen" id="play">
+  <div class="topbar">
+    <button class="small-btn" id="quitBtn">⬅ Map</button>
+    <div style="font-size:clamp(17px,3vw,23px);font-weight:900;text-align:center" id="lvlTitle"></div>
+    <div class="row"><div class="pill" id="streak">🔥 0</div><div class="pill" id="coins">🪙 0</div></div>
+  </div>
+  <div class="progress" id="progress"></div>
+  <div class="stage">
+    <div class="card qcard">
+      <div class="buddy" id="buddy"></div>
+      <div class="qtools"><button id="speakBtn" title="Read it to me">🔊</button></div>
+      <div class="boss" id="bossBox" style="display:none"><div class="m" id="bossM">👾</div><div><div style="font-weight:800" id="bossName"></div><div class="hp"><div id="bossHp"></div></div></div></div>
+      <div class="visual" id="visual"></div>
+      <div class="qtext" id="qtext"></div>
+      <div id="answerArea"></div>
+      <div class="hint" id="hint"></div>
+      <button class="big-btn gold" id="gotItBtn" style="display:none">Got it! ▶</button>
+    </div>
+    <div class="pad" id="pad"></div>
+  </div>
+</section>
+
+<!-- RESULT -->
+<section class="screen" id="result" style="justify-content:center">
+  <div class="card" style="display:flex;flex-direction:column;align-items:center;gap:8px;max-width:560px;width:100%;text-align:center">
+    <h1 id="resTitle" style="font-size:clamp(28px,6vw,46px)"></h1>
+    <div class="stars" id="resStars"><span>⭐</span><span>⭐</span><span>⭐</span></div>
+    <div style="font-size:21px;font-weight:700" id="resText"></div>
+    <div style="font-size:21px;font-weight:800" id="resLoot"></div>
+    <div style="font-size:20px;font-weight:700" id="resStickerLabel"></div>
+    <div class="row"><div style="font-size:110px" id="resHero"></div><div class="sticker-big" id="resSticker"></div></div>
+    <div class="row">
+      <button class="big-btn gray" id="resMap">Map</button>
+      <button class="big-btn gray" id="resAgain">Again</button>
+      <button class="big-btn green" id="resNext">Next ▶</button>
+    </div>
+  </div>
+</section>
+
+<!-- EVOLVE -->
+<section class="screen" id="evolve" style="justify-content:center">
+  <div class="card" style="text-align:center;max-width:520px">
+    <h2>What's happening?!</h2>
+    <div style="font-size:130px;transition:all .5s" id="evoPet"></div>
+    <h2 id="evoText"></h2>
+    <button class="big-btn green" id="evoBtn" style="display:none">Yay! ▶</button>
+  </div>
+</section>
+
+<!-- MY PROGRESS -->
+<section class="screen" id="progressScr">
+  <div class="topbar"><button class="small-btn" data-go="map">⬅ Map</button><h2>My Progress</h2><div class="pill" id="pgRank"></div></div>
+  <div class="card" style="width:100%;max-width:900px;margin-top:12px">
+    <div class="row" style="justify-content:space-around;font-size:20px;font-weight:900" id="pgTop"></div>
+    <h3>My worlds</h3><div id="pgWorlds"></div>
+    <h3>Last 7 days (questions answered)</h3><div class="days" id="pgDays"></div>
+    <h3>My skills</h3><div style="font-size:15px;color:var(--soft);font-weight:700">🌱 growing · 👍 good · ⭐ mastered</div><div class="grid-items" id="pgSkills" style="margin-top:8px"></div>
+  </div>
+</section>
+
+<!-- SKIP TEST -->
+<div class="modal" id="skipModal"><div class="card" style="text-align:center;max-width:460px">
+  <div style="font-size:60px">🚀</div>
+  <h2 id="skipTitle"></h2>
+  <p style="font-size:19px;font-weight:700" id="skipText"></p>
+  <div class="row"><button class="big-btn gray" id="skipNo">Not now</button><button class="big-btn green" id="skipGo">Try it! ▶</button></div>
+</div></div>
+
+<!-- STICKERS -->
+<section class="screen" id="stickers">
+  <div class="topbar"><button class="small-btn" data-go="map">⬅ Map</button><h2>My Sticker Book</h2><div class="pill" id="stickerCount"></div></div>
+  <div class="grid-items" id="stickerGrid" style="margin-top:14px"></div>
+</section>
+
+<!-- SHOP -->
+<section class="screen" id="shop">
+  <div class="topbar"><button class="small-btn" data-go="map">⬅ Map</button><h2>Pet Shop</h2><div class="pill" id="shopCoins"></div></div>
+  <div class="pet-panel" style="justify-content:center"><div class="pet" id="shopPet"></div></div>
+  <h3>👗 My wardrobe</h3><div class="grid-items" id="shopOutfits"></div>
+  <h3>Things for your pet</h3><div class="grid-items" id="shopAcc"></div>
+  <h3>World colors</h3><div class="grid-items" id="shopThemes"></div>
+</section>
+
+<!-- BREAK -->
+<section class="screen" id="break" style="justify-content:center">
+  <div class="card" style="text-align:center;max-width:520px">
+    <div style="font-size:90px">🦉💤</div>
+    <h2>Brain break time!</h2>
+    <p style="font-size:20px;font-weight:700">Amazing work today! Your brain grew stronger. Your pet is taking a nap — come back tomorrow for your treasure chest! 🎁</p>
+    <button class="small-btn" id="breakParent">👪 Grown-up: keep playing</button>
+  </div>
+</section>
+
+<!-- PARENT -->
+<section class="screen" id="parent">
+  <div class="topbar"><button class="small-btn" data-go="map">⬅ Map</button><h2>Grown-ups corner</h2><div></div></div>
+  <div class="card" style="width:100%;max-width:900px;margin-top:12px">
+    <div id="parentSummary" style="font-size:18px;font-weight:700"></div>
+    <h3>Skills (first-try accuracy)</h3>
+    <table id="skillTable"></table>
+    <h3>Facts to practice most</h3>
+    <div id="missedList" style="font-size:18px"></div>
+    <h3>Daily play limit</h3>
+    <div class="row" style="justify-content:flex-start" id="limitBtns"></div>
+    <h3>Move progress to another device</h3>
+    <div class="row" style="justify-content:flex-start"><button class="small-btn" id="exportBtn">Show backup code</button><button class="small-btn" id="importBtn">Restore from code</button></div>
+    <textarea id="backupBox" placeholder="Backup code appears here, or paste one to restore" style="margin-top:8px"></textarea>
+    <h3>Settings</h3>
+    <div class="row" style="justify-content:flex-start">
+      <button class="small-btn" id="unlockAll">Unlock all levels</button>
+      <button class="small-btn" id="renameBtn">Change name / hero / pet</button>
+      <button class="small-btn" id="resetBtn" style="background:#ffe1e1">Reset all progress</button>
+    </div>
+  </div>
+</section>
+
+<!-- PARENT GATE -->
+<div class="modal" id="gate"><div class="card" style="text-align:center">
+  <h2>Grown-ups only</h2><div style="font-size:26px;margin:8px 0" id="gateQ"></div>
+  <input class="name-input" id="gateIn" style="width:180px" inputmode="numeric" autocomplete="off">
+  <div class="row" style="margin-top:12px"><button class="small-btn" id="gateCancel">Cancel</button><button class="small-btn" id="gateOk" style="background:var(--good);color:#fff">Enter</button></div>
+</div></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ============ helpers ============ */
+const $ = id => document.getElementById(id);
+const ri = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const shuffle = a => { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const today = () => { const d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); };
+const hash = s => { let h=5381; for(const c of s) h=((h<<5)+h+c.charCodeAt(0))>>>0; return h; };
+const FAMILY_HASH = 3255945576; // hash of the family code (code itself is not stored here)
+
+/* ============ save data ============ */
+const KEY = "mathquest.v2";
+const fresh = () => ({name:"", avatar:"hero:girl", outfit:"cruise", pet:"dragon", petName:"", acc:"", theme:"", owned:[], stars:{}, unlocked:1, coins:0, xp:0,
+  stickers:[], stats:{}, missed:{}, sound:true, music:true, chest:"", seenLesson:{}, familyOk:false, limit:0, playDay:"", playMs:0, history:{}, lastStage:0, pro:false});
+let S;
+try { S = Object.assign(fresh(), JSON.parse(localStorage.getItem(KEY) || "{}")); } catch(e){ S = fresh(); }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} };
+// URL helpers: ?code=XXXX unlocks, ?name=NAME prefills
+const params = new URLSearchParams(location.search);
+if(params.get("code") && hash(params.get("code").trim().toUpperCase())===FAMILY_HASH){ S.familyOk = true; save(); }
+if(params.get("name") && !S.name) S.name = params.get("name").slice(0,14);
+
+/* ============ sound ============ */
+let AC = null;
+function tone(freq, dur=0.12, type="sine", when=0, vol=0.14){
+  if(!S.sound) return;
+  try{
+    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state==="suspended") AC.resume();
+    const o=AC.createOscillator(), g=AC.createGain(); o.type=type; o.frequency.value=freq; g.gain.value=vol;
+    o.connect(g); g.connect(AC.destination); const t=AC.currentTime+when;
+    o.start(t); g.gain.exponentialRampToValueAtTime(0.0001,t+dur); o.stop(t+dur+0.02);
+  }catch(e){}
+}
+const sfx = {
+  good(streak=1){ const b=520+Math.min(streak,10)*40; tone(b,.1,"triangle"); tone(b*1.25,.12,"triangle",.08); tone(b*1.5,.18,"triangle",.16); },
+  bad(){ tone(240,.16,"sine",0,.12); tone(200,.2,"sine",.12,.12); },
+  tap(){ tone(560,.05,"square",0,.035); },
+  win(){ [523,659,784,1047,784,1047,1319].forEach((f,i)=>tone(f,.16,"triangle",i*.1)); },
+  hit(){ tone(140,.12,"square",0,.1); tone(90,.16,"square",.06,.09); },
+  coin(){ tone(988,.07,"square",0,.06); tone(1319,.12,"square",.07,.06); }
+};
+
+/* ============ mild background music (generated, no files) ============ */
+let musicGain=null, musicTimer=null, nextT=0, mStep=0;
+const N={C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,B4:493.88,C5:523.25,D5:587.33,E5:659.25,G5:783.99,A5:880};
+const CHORDS=[[261.63,329.63,392],[220,261.63,329.63],[174.61,220,261.63],[196,246.94,293.66]]; // C, Am, F, G
+const MELODY=["E5",0,"G5",0,"A5",0,"G5",0,"E5",0,"D5",0,"C5",0,0,0,"C5",0,"D5",0,"E5",0,"G5",0,"A5",0,"G5",0,"E5",0,0,0,
+              "G5",0,"E5",0,"D5",0,"C5",0,"D5",0,"E5",0,"D5",0,0,0,"C5",0,"E5",0,"D5",0,"C5",0,"D5",0,0,0,"C5",0,0,0];
+function mNote(f,t,d,type,v){ const o=AC.createOscillator(), g=AC.createGain(); o.type=type; o.frequency.value=f;
+  g.gain.setValueAtTime(0.0001,t); g.gain.linearRampToValueAtTime(v,t+0.04); g.gain.exponentialRampToValueAtTime(0.0001,t+d);
+  o.connect(g); g.connect(musicGain); o.start(t); o.stop(t+d+0.05); }
+function mSchedule(){
+  const beat=60/88/2;
+  while(nextT < AC.currentTime+0.5){
+    const s=mStep%64, bar=Math.floor(s/8)%4, ch=CHORDS[bar], b=s%8;
+    if(b===0) mNote(ch[0]/2,nextT,beat*8,"sine",0.45);
+    mNote(ch[[0,1,2,1][b%4]]*(b>=4?2:1),nextT,beat*1.6,"triangle",0.12);
+    const m=MELODY[s]; if(m) mNote(N[m],nextT,beat*2.2,"sine",0.22);
+    nextT+=beat; mStep++;
+  }
+}
+function musicStart(){
+  if(!S.music || musicTimer) return;
+  try{ AC=AC||new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==="suspended") AC.resume();
+    musicGain=AC.createGain(); musicGain.gain.value=0.0001; musicGain.connect(AC.destination);
+    musicGain.gain.exponentialRampToValueAtTime(0.06, AC.currentTime+1.5);
+    nextT=AC.currentTime+0.1; mStep=0; musicTimer=setInterval(mSchedule,120); mSchedule(); }catch(e){}
+}
+function musicStop(){
+  clearInterval(musicTimer); musicTimer=null;
+  if(musicGain){ const g=musicGain; try{ g.gain.cancelScheduledValues(AC.currentTime); g.gain.setValueAtTime(g.gain.value,AC.currentTime); g.gain.exponentialRampToValueAtTime(0.0001,AC.currentTime+0.4); }catch(e){} setTimeout(()=>g.disconnect(),600); musicGain=null; }
+}
+function musicDuck(on){ if(!musicGain) return; try{ musicGain.gain.setTargetAtTime(on?0.015:0.06, AC.currentTime, 0.2); }catch(e){} }
+// browsers only allow audio after a tap, so start on the first touch/click
+document.addEventListener("pointerdown", function once(){ musicStart(); }, {passive:true});
+document.addEventListener("visibilitychange", ()=>{ if(document.hidden) musicStop(); else musicStart(); });
+
+function say(text){
+  if(!S.sound || !window.speechSynthesis) return;
+  try{
+    speechSynthesis.cancel();
+    const t = text.replace(/×/g," times ").replace(/−/g," minus ").replace(/\+/g," plus ").replace(/=/g," equals ").replace(/\?/g," what ").replace(/⬜/g," blank ").replace(/¢/g," cents");
+    const u = new SpeechSynthesisUtterance(t); u.rate=0.92; u.pitch=1.1; musicDuck(true); u.onend=u.onerror=()=>musicDuck(false); speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ============ hero: same cartoon face, many outfits (wardrobe) ============ */
+const SKIN="#f1c7a6", FACE="#f6d1b3", HAIR="#2b1d17";
+const OUTFITS = {
+  cruise:  {name:"Cruise Day", price:0,   hair:"pony",  acc:null, glasses:{t:"cateye",c:"#7fe3a0"}, top:{t:"tee",c:"#ffa68a",motif:"bow"}, bottom:{t:"shorts",c:"#4f7fc8"}, shoes:{t:"sandal",c:"#fff6e8"}, band:"#7be08a"},
+  lake:    {name:"Lake Day",   price:0,   hair:"pony",  acc:{t:"band",c:"#222"}, glasses:{t:"cateye",c:"#7fe3a0"}, top:{t:"flutter",c:"#dfe9ff",pat:"stripes"}, bottom:{t:"shorts",c:"#dfe9ff",pat:"stripes"}, shoes:{t:"sandal",c:"#fff6e8"}},
+  festive: {name:"Festival",   price:60,  hair:"pony",  acc:{t:"band",c:"#e0302e"}, glasses:null, top:{t:"puff",c:"#c8322f",pat:"diamond"}, bottom:{t:"longskirt",c:"#ffc21a"}, shoes:null, neck:"gold"},
+  sunset:  {name:"Sunset Beach",price:80, hair:"pigtails", acc:{t:"clip",c:"#ff7aa8"}, glasses:{t:"square",c:"#222",lens:"#3fa9ff"}, top:{t:"halter",c:"#ffe9a3",pat:"floral",fc:"#ffffff",fc2:"#556"}, bottom:{t:"dress",c:"#ffe9a3",pat:"floral",fc:"#ffffff",fc2:"#556"}, shoes:{t:"sandal",c:"#fff6e8"}},
+  party:   {name:"Party Star", price:120, hair:"bob",   acc:{t:"pearlband"}, glasses:null, top:{t:"flutter",c:"#1f4fd1",pat:"sequin"}, bottom:{t:"longdress",c:"#2357d8"}, shoes:null, neck:"pearls"},
+  cafe:    {name:"Café Lunch", price:100, hair:"pony",  acc:null, glasses:{t:"square",c:"#e8944a",lens:"#cfd8c0"}, top:{t:"puff",c:"#fff8f4",pat:"floral",fc:"#f28aa0",fc2:"#8bbf7a"}, bottom:{t:"skirt",c:"#fff8f4",pat:"floral",fc:"#f28aa0",fc2:"#8bbf7a"}, shoes:{t:"sandal",c:"#fff6e8"}, neck:"gold"},
+  explorer:{name:"Explorer",   price:150, hair:"pigtails", acc:{t:"band",c:"#555"}, glasses:{t:"sport",c:"#222"}, top:{t:"long",c:"#f2604f",motif:"cats",ruffle:true}, bottom:{t:"leggings",c:"#2b2f4f",pat:"dino"}, shoes:{t:"sneaker",c:"#ffffff"}},
+  snow:    {name:"Snow Princess",price:180,hair:"pigtails", acc:null, glasses:null, top:{t:"long",c:"#7fd0f5",sleeve:"#2f3566",motif:"snow"}, bottom:{t:"leggings",c:"#1d1f33"}, shoes:{t:"sneaker",c:"#222"}},
+  sunshine:{name:"Sunshine",   price:220, hair:"pigtails", acc:{t:"cap",c:"#a9c7e8"}, glasses:{t:"aviator",lens:"#4a3b33"}, top:{t:"flutter",c:"#e6d43a"}, bottom:{t:"dress",c:"#e6d43a"}, shoes:{t:"sandal",c:"#f7c6c0"}},
+  boat:    {name:"Boat Ride",  price:260, hair:"pony",  acc:{t:"bow",c:"#ffd84d"}, glasses:{t:"aviator",lens:"#1f6fe0"}, top:{t:"flutter",c:"#fff0a0"}, bottom:{t:"dress",c:"#fff0a0"}, shoes:{t:"sandal",c:"#fff6e8"}}
+};
+let HN=0;
+function heroOutfitSVG(id, full){
+  const o = OUTFITS[id] || OUTFITS.cruise, n = ++HN, P = s => `${s}${n}`;
+  let defs = "", g = "";
+  const fillOf = (part) => {
+    if(!part.pat) return part.c;
+    const pid = P(part.pat+"_"+part.t);
+    if(part.pat==="stripes") defs += `<pattern id="${pid}" width="12" height="10" patternUnits="userSpaceOnUse"><rect width="12" height="10" fill="#eef3ff"/><rect width="3" height="10" fill="#8fb2ee"/><rect x="6" width="3" height="10" fill="#e9b8de"/></pattern>`;
+    if(part.pat==="diamond") defs += `<pattern id="${pid}" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="${part.c}"/><rect x="2.5" y="2.5" width="3" height="3" fill="#f3c25a"/></pattern>`;
+    if(part.pat==="floral") defs += `<pattern id="${pid}" width="22" height="22" patternUnits="userSpaceOnUse"><rect width="22" height="22" fill="${part.c}"/><g fill="${part.fc}"><circle cx="6" cy="6" r="2.4"/><circle cx="9" cy="6" r="2.4"/><circle cx="7.5" cy="3.6" r="2.4"/><circle cx="7.5" cy="8.4" r="2.4"/></g><circle cx="7.5" cy="6" r="1.2" fill="${part.fc2}"/><g fill="${part.fc}"><circle cx="17" cy="16" r="2"/><circle cx="19.5" cy="16" r="2"/><circle cx="18.2" cy="14" r="2"/><circle cx="18.2" cy="18" r="2"/></g><circle cx="18.2" cy="16" r="1" fill="${part.fc2}"/><path d="M12 12 l3 2" stroke="${part.fc2}" stroke-width="1.2"/></pattern>`;
+    if(part.pat==="sequin") defs += `<pattern id="${pid}" width="7" height="7" patternUnits="userSpaceOnUse"><rect width="7" height="7" fill="${part.c}"/><circle cx="3.5" cy="3.5" r="2" fill="#5b86ff"/><circle cx="3" cy="3" r=".8" fill="#cfe0ff"/></pattern>`;
+    if(part.pat==="dino") defs += `<pattern id="${pid}" width="16" height="14" patternUnits="userSpaceOnUse"><rect width="16" height="14" fill="${part.c}"/><path d="M3 9 q3 -5 7 -2 l3 -2 l-1 3 q0 3 -4 3 z" fill="none" stroke="#ff8fb8" stroke-width="1.2"/></pattern>`;
+    return `url(#${pid})`;
+  };
+  const T=o.top, B=o.bottom, longSleeve = T.t==="long";
+  /* hair behind */
+  if(o.hair==="pony") g += `<path d="M138 90 C162 98 168 128 152 152 C146 136 142 118 128 106 Z" fill="${HAIR}"/>`;
+  if(o.hair==="bob") g += `<path d="M50 80 Q48 124 62 124 L138 124 Q152 124 150 80 Z" fill="${HAIR}"/>`;
+  /* legs */
+  const legFill = B.t==="leggings" ? fillOf(B) : SKIN;
+  if(B.t!=="longskirt" && B.t!=="longdress"){
+    g += `<rect x="78" y="194" width="15" height="32" rx="7" fill="${legFill}"/><rect x="107" y="194" width="15" height="32" rx="7" fill="${legFill}"/>`;
+  } else {
+    g += `<rect x="80" y="214" width="13" height="12" rx="6" fill="${SKIN}"/><rect x="107" y="214" width="13" height="12" rx="6" fill="${SKIN}"/>`;
+  }
+  /* shoes */
+  if(o.shoes){ const c=o.shoes.c, st=o.shoes.t==="sneaker";
+    g += st ? `<path d="M72 220 h24 q5 0 5 6 v4 h-32 v-4 q0 -6 3 -6z M104 220 h24 q3 0 3 6 v4 h-32 v-4 q0 -6 5 -6z" fill="${c}" stroke="#bbb" stroke-width="1.5"/><path d="M76 228 h22 M106 228 h22" stroke="#bbb" stroke-width="1.5"/>`
+            : `<path d="M74 222 h22 q4 0 4 5 v3 h-30 v-3 q0 -5 4 -5z M104 222 h22 q4 0 4 5 v3 h-30 v-3 q0 -5 4 -5z" fill="${c}" stroke="#e3cdb4" stroke-width="1.5"/><path d="M78 224 l14 6 M92 224 l-14 6 M108 224 l14 6 M122 224 l-14 6" stroke="#e0c99a" stroke-width="2"/>`; }
+  else g += `<ellipse cx="86" cy="227" rx="10" ry="4" fill="${SKIN}"/><ellipse cx="114" cy="227" rx="10" ry="4" fill="${SKIN}"/>`;
+  /* bottoms */
+  const bf = fillOf(B);
+  if(B.t==="shorts") g += `<path d="M66 166 L134 166 L136 202 L104 204 L100 186 L96 204 L64 202 Z" fill="${bf}"/>`+(B.pat?"":`<path d="M64 198 L96 200 M104 200 L136 198" stroke="#2f5a99" stroke-width="3"/>`);
+  if(B.t==="skirt") g += `<path d="M64 166 Q100 158 136 166 L150 204 Q100 212 50 204 Z" fill="${bf}"/>`;
+  if(B.t==="dress") g += `<path d="M64 160 Q100 152 136 160 L152 206 Q100 214 48 206 Z" fill="${bf}"/>`;
+  if(B.t==="longskirt") g += `<path d="M62 166 Q100 156 138 166 L156 220 Q100 228 44 220 Z" fill="${bf}"/><path d="M48 212 Q100 222 152 212" stroke="#e08f00" stroke-width="3" fill="none"/>`;
+  if(B.t==="longdress") g += `<path d="M64 160 Q100 152 136 160 L158 218 Q100 228 42 218 Z" fill="${bf}"/><path d="M80 170 Q76 196 70 216 M100 168 L100 222 M120 170 Q124 196 130 216" stroke="#183fa8" stroke-width="2" fill="none" opacity=".6"/>`;
+  if(B.t==="leggings") g += `<path d="M68 166 L132 166 L130 196 L70 196 Z" fill="${bf}"/>`;
+  /* top */
+  const tf = fillOf(T);
+  const sleeveC = T.sleeve || tf;
+  if(T.t==="halter"){
+    g += `<path d="M68 138 Q100 132 132 138 L136 172 Q100 180 64 172 Z" fill="${tf}"/><path d="M76 138 L92 118 M124 138 L108 118" stroke="${T.c}" stroke-width="5" stroke-linecap="round"/>`;
+  } else {
+    g += `<path d="M64 136 Q100 124 136 136 L138 172 Q100 180 62 172 Z" fill="${tf}"/>`;
+    if(T.ruffle) g += `<path d="M62 170 q6 8 12 0 q6 8 12 0 q6 8 12 0 q6 8 12 0 q6 8 12 0 q6 8 14 0" fill="${tf}" stroke="${tf}" stroke-width="2"/>`;
+  }
+  /* arms */
+  if(longSleeve){
+    g += `<path d="M54 146 Q44 170 56 184" stroke="${sleeveC}" stroke-width="15" stroke-linecap="round" fill="none"/><path d="M146 146 Q156 170 144 184" stroke="${sleeveC}" stroke-width="15" stroke-linecap="round" fill="none"/>`;
+    g += `<circle cx="57" cy="187" r="6.5" fill="${SKIN}"/><circle cx="143" cy="187" r="6.5" fill="${SKIN}"/>`;
+  } else {
+    g += `<path d="M52 152 Q46 172 58 184" stroke="${SKIN}" stroke-width="12" stroke-linecap="round" fill="none"/><path d="M148 152 Q154 172 142 184" stroke="${SKIN}" stroke-width="12" stroke-linecap="round" fill="none"/>`;
+  }
+  if(T.t==="tee"||T.t==="puff") g += `<ellipse cx="62" cy="144" rx="14" ry="12" fill="${tf}"/><ellipse cx="138" cy="144" rx="14" ry="12" fill="${tf}"/>`;
+  if(T.t==="flutter") g += `<path d="M66 134 Q46 132 44 152 Q52 146 58 152 Q62 144 70 146 Z" fill="${tf}" stroke="rgba(0,0,0,.08)"/><path d="M134 134 Q154 132 156 152 Q148 146 142 152 Q138 144 130 146 Z" fill="${tf}" stroke="rgba(0,0,0,.08)"/>`;
+  if(o.band) g += `<rect x="53" y="174" width="10" height="5" rx="2" fill="${o.band}"/>`;
+  /* motifs */
+  if(T.motif==="bow") g += `<path d="M100 152 q-14 -10 -16 0 q2 8 16 0 q14 -10 16 0 q-2 8 -16 0 z" fill="#fff" stroke="#f08a9c" stroke-width="1.5"/><path d="M100 152 l-8 14 M100 152 l8 14" stroke="#fff" stroke-width="4" stroke-linecap="round"/><circle cx="100" cy="152" r="3" fill="#f08a9c"/>`;
+  if(T.motif==="cats") g += `<g fill="#fff"><ellipse cx="92" cy="156" rx="7" ry="4"/><circle cx="85" cy="153" r="3"/><path d="M83 150 l1 -3 l2 3 M86 150 l1 -3 l1 3"/></g><g fill="#f6b37a"><ellipse cx="110" cy="156" rx="6" ry="5"/><circle cx="110" cy="148" r="4"/><path d="M107 145 l1 -4 l2 3 M111 144 l2 -3 l0 4"/></g>`;
+  if(T.motif==="snow") g += `<g stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M100 144 v20 M91 154 h18 M94 148 l12 12 M106 148 l-12 12"/><path d="M80 164 v8 M76 168 h8" /><path d="M120 162 v8 M116 166 h8"/></g><circle cx="100" cy="154" r="3" fill="#fff"/>`;
+  /* neck + necklace */
+  g += `<rect x="91" y="118" width="18" height="16" rx="6" fill="${SKIN}"/>`;
+  if(T.t==="halter") g += `<path d="M90 130 L100 140 L110 130" stroke="${T.c}" stroke-width="4" fill="none"/>`;
+  if(o.neck==="gold") g += `<path d="M86 132 Q100 146 114 132" stroke="#f2b632" stroke-width="3" fill="none"/><circle cx="100" cy="140" r="3" fill="#f2b632"/>`;
+  if(o.neck==="pearls"){ for(let i=0;i<=10;i++){ const t=i/10, x=84+32*t, y=130+ (1-Math.pow(2*t-1,2))*16; g+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6" fill="#fffaf0" stroke="#d9d2c0" stroke-width=".8"/>`; } }
+  /* head */
+  g += `<ellipse cx="100" cy="78" rx="51" ry="50" fill="${HAIR}"/>`;
+  if(o.hair==="pigtails") g += `<ellipse cx="46" cy="104" rx="13" ry="16" fill="${HAIR}"/><ellipse cx="154" cy="104" rx="13" ry="16" fill="${HAIR}"/><circle cx="52" cy="92" r="4" fill="#ff6f9a"/><circle cx="148" cy="92" r="4" fill="#ff6f9a"/>`;
+  g += `<ellipse cx="57" cy="88" rx="7" ry="9" fill="${SKIN}"/><ellipse cx="143" cy="88" rx="7" ry="9" fill="${SKIN}"/><circle cx="57" cy="99" r="3" fill="#ffd34d"/><circle cx="143" cy="99" r="3" fill="#ffd34d"/>`;
+  g += `<ellipse cx="100" cy="86" rx="42" ry="42" fill="${FACE}"/>`;
+  g += o.hair==="bob" ? `<path d="M58 80 Q58 38 100 36 Q142 38 142 80 Q136 60 114 54 Q102 50 100 50 Q98 50 86 54 Q64 60 58 80 Z" fill="${HAIR}"/>`
+                      : `<path d="M58 76 Q58 38 100 36 Q142 38 142 76 Q138 58 120 52 Q108 62 84 60 Q66 62 58 76 Z" fill="${HAIR}"/>`;
+  /* hair accessories */
+  const A=o.acc;
+  if(A&&A.t==="band") g += `<path d="M57 68 Q100 20 143 68" stroke="${A.c}" stroke-width="6" fill="none" stroke-linecap="round"/>`;
+  if(A&&A.t==="pearlband"){ for(let i=0;i<=14;i++){ const a=Math.PI*(1-i/14), x=100+44*Math.cos(a), y=64-30*Math.sin(a); g+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="#fffaf0" stroke="#d9d2c0" stroke-width=".8"/>`; } g+=`<path d="M128 54 l8 -6 l2 8 z" fill="#5fb4ff"/>`; }
+  if(A&&A.t==="clip") g += `<rect x="62" y="56" width="20" height="6" rx="3" fill="${A.c}" transform="rotate(-35 72 59)"/>`;
+  if(A&&A.t==="bow") g += `<path d="M132 52 q10 -12 16 -2 q-8 6 -16 2 z M132 52 q-4 -14 -14 -8 q4 9 14 8 z" fill="${A.c}"/><circle cx="132" cy="52" r="3" fill="#f2b632"/>`;
+  if(A&&A.t==="cap") g += `<path d="M52 62 Q56 26 100 24 Q144 26 148 62 Q100 50 52 62 Z" fill="${A.c}"/><path d="M48 60 Q100 46 152 60 Q156 70 146 70 Q100 58 54 70 Q44 70 48 60 Z" fill="#94b4da"/><g fill="#fff"><circle cx="80" cy="40" r="3"/><circle cx="104" cy="34" r="3"/><circle cx="126" cy="44" r="3"/></g><g fill="#ffd34d"><circle cx="80" cy="40" r="1.3"/><circle cx="104" cy="34" r="1.3"/><circle cx="126" cy="44" r="1.3"/></g>`;
+  /* face */
+  const by = A&&A.t==="cap" ? 4 : 0;
+  g += `<path d="M71 ${71+by} Q80 ${67+by} 89 ${70+by}" stroke="${HAIR}" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M111 ${70+by} Q120 ${67+by} 129 ${71+by}" stroke="${HAIR}" stroke-width="2.6" fill="none" stroke-linecap="round"/>`;
+  g += `<ellipse cx="81" cy="88" rx="10.5" ry="11.5" fill="#fff"/><ellipse cx="119" cy="88" rx="10.5" ry="11.5" fill="#fff"/><circle cx="82" cy="89" r="8.4" fill="#5a3522"/><circle cx="120" cy="89" r="8.4" fill="#5a3522"/><circle cx="82" cy="89" r="4.4" fill="#1b0f09"/><circle cx="120" cy="89" r="4.4" fill="#1b0f09"/><circle cx="85" cy="85.5" r="2.8" fill="#fff"/><circle cx="123" cy="85.5" r="2.8" fill="#fff"/>`;
+  /* glasses (see-through so her eyes still show) */
+  const Gl=o.glasses;
+  if(Gl&&Gl.t==="cateye") g += `<path d="M60 84 Q62 78 72 79 L92 82 Q97 84 96 92 Q94 102 82 102 Q66 101 62 92 Q58 88 60 84 Z M140 84 Q138 78 128 79 L108 82 Q103 84 104 92 Q106 102 118 102 Q134 101 138 92 Q142 88 140 84 Z" fill="#d9fbe4" fill-opacity=".18" stroke="${Gl.c}" stroke-width="4" stroke-linejoin="round"/><path d="M96 86 Q100 83 104 86" stroke="${Gl.c}" stroke-width="4" fill="none"/><path d="M60 84 L54 79 M140 84 L146 79" stroke="${Gl.c}" stroke-width="4" stroke-linecap="round"/>`;
+  if(Gl&&Gl.t==="square") g += `<rect x="62" y="78" width="34" height="24" rx="6" fill="${Gl.lens}" fill-opacity=".35" stroke="${Gl.c}" stroke-width="4"/><rect x="104" y="78" width="34" height="24" rx="6" fill="${Gl.lens}" fill-opacity=".35" stroke="${Gl.c}" stroke-width="4"/><path d="M96 86 Q100 83 104 86 M62 82 L54 80 M138 82 L146 80" stroke="${Gl.c}" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M68 84 l8 -3 M110 84 l8 -3" stroke="#fff" stroke-width="2" opacity=".7"/>`;
+  if(Gl&&Gl.t==="aviator") g += `<path d="M62 82 Q80 76 96 82 Q98 100 80 104 Q62 102 62 82 Z M104 82 Q120 76 138 82 Q138 102 120 104 Q102 100 104 82 Z" fill="${Gl.lens}" fill-opacity=".38" stroke="#9aa3ad" stroke-width="2.5"/><path d="M96 82 Q100 78 104 82 M62 82 L54 80 M138 82 L146 80" stroke="#9aa3ad" stroke-width="2.5" fill="none"/><path d="M68 86 l9 -3 M110 86 l9 -3" stroke="#fff" stroke-width="2" opacity=".7"/>`;
+  if(Gl&&Gl.t==="sport") g += `<path d="M58 82 Q100 72 142 82 L140 96 Q122 102 104 96 L100 92 L96 96 Q78 102 60 96 Z" fill="#333" fill-opacity=".38" stroke="${Gl.c}" stroke-width="3.5" stroke-linejoin="round"/><path d="M132 80 l8 -4" stroke="#ccc" stroke-width="2"/>`;
+  g += `<ellipse cx="68" cy="107" rx="7" ry="4.5" fill="#ff8fa3" opacity=".5"/><ellipse cx="132" cy="107" rx="7" ry="4.5" fill="#ff8fa3" opacity=".5"/>`;
+  g += `<path d="M99 101 Q101 104 99 105" stroke="#d99b7a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M86 110 Q100 125 114 110 Z" fill="#a8323e"/><path d="M87.5 111 Q100 116 112.5 111 L112 113.5 Q100 118 88 113.5 Z" fill="#fff"/>`;
+  const vb = full ? "0 0 200 240" : "38 22 124 124";
+  return `<svg class="hero-av" xmlns="http://www.w3.org/2000/svg" viewBox="${vb}"><defs>${defs}</defs>${g}</svg>`;
+}
+
+
+function heroSVG(full){ return heroOutfitSVG(S.outfit||"cruise", full); }
+function avatarHTML(a, full){ return a==="hero:girl" ? heroSVG(full) : a; }
+
+/* ============ pets, shop, ranks ============ */
+const PETS = {
+  dragon:{egg:"🥚", stages:["🥚","🦎","🐲","🐉","🐉"], label:"Dragon"},
+  unicorn:{egg:"🥚", stages:["🥚","🐴","🦄","🦄","🦄"], label:"Unicorn"},
+  bird:{egg:"🥚", stages:["🥚","🐣","🐥","🦜","🦚"], label:"Bird"},
+  cat:{egg:"🥚", stages:["🥚","🐱","😺","🐯","🦁"], label:"Cat"}
+};
+const STAGE_XP = [0,15,60,150,300];
+const STAGE_NAMES = ["Magic egg","Baby","Kid","Grown-up","LEGENDARY"];
+const ACCS = [["🎀",15],["🧢",25],["🎈",30],["🌸",35],["🕶️",50],["🎩",60],["🪄",80],["🎧",90],["🦋",100],["👑",150],["💎",200],["🚀",250]];
+const THEMES = [["","Sunny",0],["t-candy","Candy",40],["t-ocean","Ocean",60],["t-jungle","Jungle",60],["t-space","Space",100]];
+const RANKS = [[0,"Rookie 🐣"],[8,"Explorer 🧭"],[20,"Adventurer 🗺️"],[35,"Champion 🏅"],[55,"Master 🥋"],[75,"Math PRO 🏆"],[95,"LEGEND 👑"]];
+function petStage(){ let s=0; STAGE_XP.forEach((x,i)=>{ if(S.xp>=x) s=i; }); return s; }
+function petEmoji(){ return PETS[S.pet].stages[petStage()]; }
+function petHTML(){ const st=petStage(); return `${petEmoji()}${S.acc?`<span class="acc">${S.acc}</span>`:""}`; }
+function rankName(){ const st=totalStars(); let r=RANKS[0][1]; RANKS.forEach(([n,t])=>{ if(st>=n) r=t; }); return r; }
+
+/* ============ visuals ============ */
+function tenFrames(a, b=0, crossed=0){
+  const total=a+b, frames=Math.max(1,Math.ceil(total/10)); let h="", idx=0;
+  for(let f=0;f<frames;f++){ h+='<div class="tf">'; for(let i=0;i<10;i++){ let c=""; if(idx<a) c="a"; else if(idx<total) c="b"; if(c && idx>=total-crossed) c+=" x"; h+=`<div class="${c}"></div>`; idx++; } h+="</div>"; }
+  return h;
+}
+function bondVisual(w,p1,p2){
+  return `<div class="bond"><svg viewBox="0 0 240 160"><line x1="120" y1="40" x2="50" y2="118" stroke="#7c5cff" stroke-width="5"/><line x1="120" y1="40" x2="190" y2="118" stroke="#7c5cff" stroke-width="5"/></svg>
+  <div class="c" style="left:84px;top:0;background:#fff3c4">${w}</div><div class="c" style="left:12px;top:84px">${p1}</div><div class="c" style="left:156px;top:84px">${p2}</div></div>`;
+}
+const groupsVisual=(g,e,em)=>{ let h=""; for(let i=0;i<g;i++) h+=`<div class="group">${em.repeat(e)||"&nbsp;"}</div>`; return h; };
+function arrayVisual(r,c,em){ let h=`<div class="array" style="grid-template-columns:repeat(${c},1fr)">`; for(let i=0;i<r*c;i++) h+=`<span>${em}</span>`; return h+"</div>"; }
+function areaVisual(r,c){ const s=Math.min(34, Math.floor(300/Math.max(r,c))); let h=`<div style="display:grid;grid-template-columns:repeat(${c},${s}px);gap:2px;background:#ff6b6b;padding:3px;border-radius:4px">`;
+  for(let i=0;i<r*c;i++) h+=`<div style="width:${s}px;height:${s}px;background:#ffe3a3"></div>`; return h+"</div>"; }
+function blocksVisual(n){ const t=Math.floor(n/10), o=n%10; let h='<div class="blocks">'; for(let i=0;i<t;i++) h+='<div class="rod"></div>'; h+='<div class="cubes">'; for(let i=0;i<o;i++) h+='<div class="cube"></div>'; return h+"</div></div>"; }
+function martian(n){ const t=Math.floor(n/10), o=n%10; let h='<div class="mart">'; for(let i=0;i<t;i++) h+='<div class="r"></div>'; if(o){ h+='<div class="dots">'; for(let i=0;i<o;i++) h+='<div class="d"></div>'; h+="</div>"; } return h+"</div>"; }
+function coins(d,p){ let h='<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;max-width:420px">'; for(let i=0;i<d;i++) h+='<div class="coin dime">10¢</div>'; for(let i=0;i<p;i++) h+='<div class="coin penny">1¢</div>'; return h+"</div>"; }
+function crossLines(a,b,dots){
+  const W=220,H=180,pad=24; let s=`<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="background:#fff;border-radius:12px;background-image:linear-gradient(#eee 1px,transparent 1px),linear-gradient(90deg,#eee 1px,transparent 1px);background-size:20px 20px">`;
+  const xs=[...Array(a)].map((_,i)=>pad+(i+1)*(W-2*pad)/(a+1)), ys=[...Array(b)].map((_,i)=>pad+(i+1)*(H-2*pad)/(b+1));
+  xs.forEach(x=>s+=`<line x1="${x}" y1="10" x2="${x}" y2="${H-10}" stroke="#3b4bd8" stroke-width="4" stroke-linecap="round"/>`);
+  ys.forEach(y=>s+=`<line x1="10" y1="${y}" x2="${W-10}" y2="${y}" stroke="#ff6b9a" stroke-width="4" stroke-linecap="round"/>`);
+  if(dots) xs.forEach(x=>ys.forEach(y=>s+=`<circle cx="${x}" cy="${y}" r="7" fill="#22b573"/>`));
+  return s+"</svg>";
+}
+function balance(left,right){
+  return `<svg width="300" height="170" viewBox="0 0 300 170"><polygon points="150,60 130,160 170,160" fill="#9a8cff"/><rect x="30" y="52" width="240" height="8" rx="4" fill="#7c5cff"/>
+  <line x1="60" y1="60" x2="60" y2="96" stroke="#7c5cff" stroke-width="3"/><line x1="240" y1="60" x2="240" y2="96" stroke="#7c5cff" stroke-width="3"/>
+  <rect x="10" y="96" width="100" height="46" rx="12" fill="#fff3c4" stroke="#e0b100" stroke-width="3"/><text x="60" y="128" text-anchor="middle" font-size="24" font-weight="900" fill="#2b2350">${left}</text>
+  <rect x="190" y="96" width="100" height="46" rx="12" fill="#d9f3ff" stroke="#3fa9ff" stroke-width="3"/><text x="240" y="128" text-anchor="middle" font-size="24" font-weight="900" fill="#2b2350">${right}</text></svg>`;
+}
+function numberLine(start, change){
+  const end=start+change, hi=Math.max(20,start,end), W=600, pad=18, x=v=>pad+v*(W-2*pad)/hi;
+  let s=`<svg width="100%" style="max-width:${W}px" viewBox="0 0 ${W} 110"><line x1="${pad}" y1="80" x2="${W-pad}" y2="80" stroke="#2b2350" stroke-width="3"/>`;
+  for(let v=0;v<=hi;v++){ s+=`<line x1="${x(v)}" y1="72" x2="${x(v)}" y2="88" stroke="#2b2350" stroke-width="${v%5?1.5:3}"/>`;
+    if(v%5===0||v===start||v===end) s+=`<text x="${x(v)}" y="106" font-size="15" text-anchor="middle" font-weight="${v===start||v===end?900:400}" fill="${v===end?'#22b573':'#2b2350'}">${v}</text>`; }
+  const st=change>0?1:-1; for(let i=0;i<Math.abs(change);i++){ const a=start+i*st, b=a+st; s+=`<path d="M${x(a)},76 Q${(x(a)+x(b))/2},30 ${x(b)},76" fill="none" stroke="${change>0?'#7c5cff':'#ff6b6b'}" stroke-width="3"/>`; }
+  return s+"</svg>";
+}
+/* column problems: q.col = {top, bot, op, res, hide:{row:'t'|'b'|'r', i}} */
+function digitsOf(n,w){ return String(n).padStart(w," ").split(""); }
+function renderColumn(q, input, showCarry){
+  const c=q.col, w=Math.max(String(c.top).length,String(c.bot).length,String(c.res).length);
+  const T=digitsOf(c.top,w), B=digitsOf(c.bot,w), R=digitsOf(c.res,w);
+  let h=`<div class="col" style="grid-template-columns:repeat(${w+1},auto)">`;
+  // carry row
+  h+=`<div class="cell carry"></div>`;
+  for(let i=0;i<w;i++) h+=`<div class="cell carry">${showCarry && c.carry && c.carry[i]?c.carry[i]:""}</div>`;
+  const cellFor=(row,arr,i)=>{
+    if(c.hide && c.hide.row===row && c.hide.i===i) return `<div class="cell miss">${input||"?"}</div>`;
+    return `<div class="cell">${arr[i]===" "?"":arr[i]}</div>`;
+  };
+  h+=`<div class="cell"></div>`; for(let i=0;i<w;i++) h+=cellFor("t",T,i);
+  h+=`<div class="cell">${c.op}</div>`; for(let i=0;i<w;i++) h+=cellFor("b",B,i);
+  h+=`<div class="line"></div><div class="cell"></div>`;
+  if(c.hide){ for(let i=0;i<w;i++) h+=cellFor("r",R,i); }
+  else { const inp=String(input||"").padStart(w," ").slice(-w).split(""); const resLen=String(c.res).length;
+    for(let i=0;i<w;i++){ const active = i>=w-resLen; h+= active ? `<div class="cell ans ${i===w-Math.min(input.length+1,resLen)?'focus':''}">${inp[i]===" "?"":inp[i]}</div>` : `<div class="cell"></div>`; } }
+  return h+"</div>";
+}
+function carryMarks(a,b,op){
+  // returns carry/borrow marks per column position (aligned to width of result)
+  const w=Math.max(String(a).length,String(b).length,String(op==="+"?a+b:a-b).length), marks=Array(w).fill("");
+  const A=String(a).padStart(w,"0"), B=String(b).padStart(w,"0");
+  if(op==="+"){ let carry=0; for(let i=w-1;i>=0;i--){ const s=+A[i]+ +B[i]+carry; carry=s>=10?1:0; if(carry && i>0) marks[i-1]="1"; } }
+  else { let borrow=0; for(let i=w-1;i>=0;i--){ let d=+A[i]-borrow; if(d<+B[i]){ borrow=1; if(i>0) marks[i]="10+"; } else borrow=0; } }
+  return marks;
+}
+
+/* ============ question generators ============ */
+const THINGS=["stickers","apples","crayons","cookies","shells","balloons","marbles","flowers","penguins","crabs"];
+const FRIENDS=[["Mia","she","her"],["Liam","he","him"],["Ava","she","her"],["Dan","he","him"],["Camilla","she","her"],["Max","he","him"],["Zoe","she","her"]];
+const EMOJI=["🍎","🍓","🐟","⭐","🌸","🍪","🐞","🎈","🧁","🐱"];
+const me = () => S.name || "you";
+
+function addQ(a,b,o={}){
+  const q={text:`${a} + ${b} = ?`, answer:a+b, key:`${Math.min(a,b)}+${Math.max(a,b)}`};
+  if(a+b<=20){ q.visual=o.frames?tenFrames(a,b):""; q.hint = a<10&&a+b>10 ? `Make a 10! ${a} + ${10-a} = 10. Then 10 + ${b-(10-a)} = ?` : `Start at ${a} and hop forward ${b}.`; q.hintVis=numberLine(a,b); }
+  else { q.hint=`Tens first: ${a-a%10} + ${b-b%10} = ${a-a%10+b-b%10}. Then ones: ${a%10} + ${b%10} = ${a%10+b%10}.`+(a%10+b%10>=10?" 10 ones make a new ten!":""); q.hintVis=blocksVisual(a)+'<b style="font-size:36px">+</b>'+blocksVisual(b); }
+  q.explain=`${a} + ${b} = ${a+b}`; return q;
+}
+function subQ(a,b,o={}){
+  const q={text:`${a} − ${b} = ?`, answer:a-b, key:`${a}-${b}`};
+  if(a<=20){ q.visual=o.frames?tenFrames(a,0,b):""; q.hint = a>10&&b>a-10 ? `Think addition: ${b} + ? = ${a}. Count up from ${b} to ${a}.` : `Start at ${a} and hop back ${b}.`; q.hintVis=numberLine(a,-b); }
+  else { const br=(a%10)<(b%10); q.hint = br ? `Not enough ones! Trade 1 ten for 10 ones: ${a%10} ones become ${a%10+10}. ${a%10+10} − ${b%10} = ${a%10+10-b%10}.` : `Tens: ${a-a%10} − ${b-b%10} = ${a-a%10-(b-b%10)}. Ones: ${a%10} − ${b%10} = ${a%10-b%10}.`; q.hintVis=blocksVisual(a); }
+  q.explain=`${a} − ${b} = ${a-b}`; return q;
+}
+function colQ(top,bot,op,hide){
+  const res = op==="+"?top+bot:top-bot;
+  const q={text: hide?"Find the missing digit!":"", answer: res, key:`col${op}`, col:{top,bot,op,res,carry:carryMarks(top,bot,op)}};
+  if(hide){ q.col.hide=hide; const w=Math.max(String(top).length,String(bot).length,String(res).length); const src={t:top,b:bot,r:res}[hide.row]; q.answer=+String(src).padStart(w," ")[hide.i]; q.key=`miss${op}`; }
+  const ones = op==="+" ? (top%10)+(bot%10) : 0;
+  q.hint = hide ? `Look at one column at a time. In the ones column: ${top%10} ${op} ${bot%10} ${op==="+"?"→ ones digit "+((top%10+bot%10)%10):""}. Remember the little carried 1!`
+    : op==="+" ? (ones>=10 ? `Ones first: ${top%10} + ${bot%10} = ${ones}. Write ${ones%10}, carry the 1 to the tens! (Trade 10 pennies for a dime.)` : `Ones first: ${top%10} + ${bot%10} = ${ones}. Then tens: ${Math.floor(top/10)} + ${Math.floor(bot/10)}.`)
+    : ((top%10)<(bot%10) ? `Ones: ${top%10} − ${bot%10}? Not enough! Borrow a ten: ${top%10+10} − ${bot%10} = ${top%10+10-bot%10}. Tens now has one less.` : `Ones first: ${top%10} − ${bot%10} = ${top%10-bot%10}. Then tens.`);
+  q.explain=`${top} ${op==="+"?"+":"−"} ${bot} = ${res}`; q.showCarryOnHint=true;
+  return q;
+}
+const GEN = {
+  bonds10(){ const w=pick([10,10,10,ri(6,9)]), p=ri(1,w-1); return {text:`${p} + ? = ${w}`, answer:w-p, key:`${p}+?=${w}`, visual:bondVisual(w,p,"?")+tenFrames(p), hint:`Count the empty boxes to fill up to ${w}.`, hintVis:tenFrames(p,w-p), explain:`${p} + ${w-p} = ${w}`}; },
+  add10(){ const a=ri(1,9), b=ri(1,10-a); return addQ(a,b,{frames:true}); },
+  sub10(){ const a=ri(3,10), b=ri(1,a-1); return subQ(a,b,{frames:true}); },
+  make10(){ const a=ri(6,9), b=ri(11-a,9); const q=addQ(a,b,{frames:true}); q.hint=`Make a 10! ${a} + ${10-a} = 10. ${b} − ${10-a} = ${b-(10-a)} left over. 10 + ${b-(10-a)} = ?`; return q; },
+  add20(){ if(Math.random()<.4){ const a=ri(11,15), b=ri(1,19-a); return addQ(a,b); } return addQ(ri(3,9),ri(3,9)); },
+  sub20(){ if(Math.random()<.35){ const a=ri(13,19), b=ri(1,a%10); return subQ(a,b); } const a=ri(11,18); return subQ(a,ri(a-9,9),{frames:true}); },
+  family(){
+    const a=ri(2,9), b=ri(2,9), c=a+b, t=ri(0,2), base={key:`fam${Math.min(a,b)},${Math.max(a,b)}`, hint:`${a}, ${b} and ${c} are a fact family: ${a} + ${b} = ${c}, ${c} − ${b} = ${a}.`, hintVis:bondVisual(c,a,b)};
+    if(t===0) return Object.assign(base,{text:`${a} + ? = ${c}`, answer:b, explain:`${a} + ${b} = ${c}`, visual:bondVisual(c,a,"?")});
+    if(t===1) return Object.assign(base,{text:`? − ${b} = ${a}`, answer:c, explain:`${c} − ${b} = ${a}`, visual:bondVisual("?",a,b)});
+    return Object.assign(base,{text:`${c} − ? = ${a}`, answer:b, explain:`${c} − ${b} = ${a}`, visual:bondVisual(c,a,"?")});
+  },
+  compare(){ const a=ri(3,9), b=ri(3,9), s=a+b, r=pick([s,s+ri(1,3),s-ri(1,3)]), ans=s>r?">":s<r?"<":"=";
+    return {text:`${a} + ${b}  ⬜  ${r}`, answer:ans, choices:["<","=",">"], key:`cmp${a}+${b}`, hint:`First work out ${a} + ${b}. The crocodile's mouth opens to the BIGGER side! 🐊`, explain:`${a} + ${b} = ${s}, so ${s} ${ans} ${r}`}; },
+  martian(){
+    const a=ri(21,79), t=ri(0,2);
+    if(t===0){ const b=10*ri(1,Math.floor(a/10)-1); return {text:"Martian numbers! ▮ = 10  • = 1\nWhat is the answer in our numbers?", answer:a-b, key:"martian", visual:martian(a)+'<b style="font-size:36px">−</b>'+martian(b), hint:`Count the rods by tens and dots by ones: first is ${a}, second is ${b}.`, explain:`${a} − ${b} = ${a-b}`}; }
+    if(t===1){ const b=ri(1,a%10||1); return {text:"Martian numbers! ▮ = 10  • = 1\nWhat is the answer in our numbers?", answer:a-b, key:"martian", visual:martian(a)+'<b style="font-size:36px">−</b>'+martian(b), hint:`First is ${a}. Take away ${b} dots.`, explain:`${a} − ${b} = ${a-b}`}; }
+    const b=ri(11,99-a); return {text:"Martian numbers! ▮ = 10  • = 1\nWhat is the answer in our numbers?", answer:a+b, key:"martian", visual:martian(a)+'<b style="font-size:36px">+</b>'+martian(b), hint:`${a} and ${b}. Add rods with rods, dots with dots. 10 dots make a rod!`, explain:`${a} + ${b} = ${a+b}`};
+  },
+  mental(){ const t=ri(0,3);
+    if(t===0){ const o=ri(1,9), a=10*ri(3,9)+o, b=10*ri(1,Math.floor(a/10)-1)+o; return Object.assign(subQ(a,b),{hint:`Same ones! ${o} − ${o} = 0. Tens: ${Math.floor(a/10)} − ${Math.floor(b/10)}.`}); }
+    if(t===1){ const a=ri(21,99), b=10*ri(1,Math.floor(a/10)-1); return subQ(a,b); }
+    if(t===2){ const a=ri(12,99), b=ri(1,a%10||1); return subQ(a,b); }
+    const a=ri(11,79), b=10*ri(1,Math.floor((99-a)/10)); return addQ(a,b);
+  },
+  colAdd(){ const at=ri(1,7), bt=ri(1,8-at), ao=ri(0,8), bo=ri(0,9-ao); return colQ(at*10+ao, bt*10+bo, "+"); },
+  colCarry(){ const ao=ri(2,9), bo=ri(10-ao,9), at=ri(1,7), bt=ri(1,8-at); return colQ(at*10+ao, bt*10+bo, "+"); },
+  colSub(){ const at=ri(3,9), bt=ri(1,at-1), ao=ri(1,9), bo=ri(0,ao); return colQ(at*10+ao, bt*10+bo, "−"); },
+  colBorrow(){ const ao=ri(0,7), bo=ri(ao+1,9), at=ri(3,9), bt=ri(1,at-1); return colQ(at*10+ao, bt*10+bo, "−"); },
+  missDigit(){
+    const op=pick(["+","+","−"]); let top,bot;
+    if(op==="+"){ top=ri(12,69); bot=ri(11,98-top); } else { top=ri(41,98); bot=ri(11,top-11); }
+    const res=op==="+"?top+bot:top-bot, w=Math.max(String(top).length,String(bot).length,String(res).length);
+    const opts=[]; ["t","b","r"].forEach(row=>{ const s=String({t:top,b:bot,r:res}[row]).padStart(w," "); for(let i=0;i<w;i++) if(s[i]!==" ") opts.push({row,i}); });
+    return colQ(top,bot,op,pick(opts));
+  },
+  xEq(){
+    const t=ri(0,3);
+    if(t===0){ const b=10*ri(1,5), x=ri(2,9); return {text:`X + ${b} = ${x+b}\nX = ?`, answer:x, key:"x+b", hint:`To find X, take ${b} away from ${x+b}: X = ${x+b} − ${b}.`, hintVis:bondVisual(x+b,"X",b), explain:`X = ${x+b} − ${b} = ${x}`}; }
+    if(t===1){ const a=ri(11,40), x=10*ri(1,5); return {text:`${a} + X = ${a+x}\nX = ?`, answer:x, key:"a+x", hint:`X = ${a+x} − ${a}.`, hintVis:bondVisual(a+x,a,"X"), explain:`X = ${a+x} − ${a} = ${x}`}; }
+    if(t===2){ const b=ri(3,9), r=ri(5,15); return {text:`X − ${b} = ${r}\nX = ?`, answer:r+b, key:"x-b", hint:`X is the WHOLE. The parts are ${b} and ${r}. Whole = ${b} + ${r}.`, hintVis:bondVisual("X",b,r), explain:`X = ${r} + ${b} = ${r+b}`}; }
+    const x=ri(3,9), a=x+ri(3,12); return {text:`${a} − X = ${a-x}\nX = ?`, answer:x, key:"a-x", hint:`X = ${a} − ${a-x}.`, hintVis:bondVisual(a,"X",a-x), explain:`X = ${a} − ${a-x} = ${x}`};
+  },
+  balance(){ const b=ri(1,9), x=ri(3,15), tot=x+b; return {text:"The scale is balanced. What is X?", answer:x, key:"balance", visual:balance(`X + ${b}`, tot),
+    hint:`Both sides weigh the same: X + ${b} = ${tot}. Take ${b} off both sides!`, explain:`X + ${b} = ${tot} → X = ${tot} − ${b} = ${x}`}; },
+  chains(){ const t=ri(0,2); let a,b,c,txt,ans,h;
+    if(t===0){ a=10*ri(1,5); b=ri(1,9); c=ri(1,b); ans=a+b-c; txt=`${a} + ${b} − ${c} = ?`; h=`Go left to right: ${a} + ${b} = ${a+b}. Then ${a+b} − ${c}.`; }
+    else if(t===1){ a=ri(15,60); b=ri(2,9); c=ri(2,9); ans=a-b+c; txt=`${a} − ${b} + ${c} = ?`; h=`Left to right: ${a} − ${b} = ${a-b}. Then ${a-b} + ${c}.`; }
+    else { a=ri(10,20); b=ri(1,4); c=ri(1,4); ans=a-b-c; txt=`${a} − ${b} − ${c} = ?`; h=`${a} − ${b} = ${a-b}. Then ${a-b} − ${c}. (Or take away ${b+c} all at once!)`; }
+    return {text:txt, answer:ans, key:"chain", hint:h, explain:`${txt.replace("?",ans)}`}; },
+  parens(){ const t=ri(0,2); let txt,ans,h;
+    if(t===0){ const a=ri(3,9), b=ri(3,9), c=ri(1,b-1); ans=a+(b-c); txt=`${a} + (${b} − ${c}) = ?`; h=`Parentheses first! ${b} − ${c} = ${b-c}. Then ${a} + ${b-c}.`; }
+    else if(t===1){ const a=ri(8,15), b=ri(3,7), c=ri(1,b-1); ans=a-(b-c); txt=`${a} − (${b} − ${c}) = ?`; h=`Parentheses first! ${b} − ${c} = ${b-c}. Then ${a} − ${b-c}.`; }
+    else { const a=ri(10,20), b=ri(1,4), c=ri(1,4); ans=a-(b+c); txt=`${a} − (${b} + ${c}) = ?`; h=`Parentheses first! ${b} + ${c} = ${b+c}. Then ${a} − ${b+c}.`; }
+    return {text:txt, answer:ans, key:"parens", hint:h, explain:txt.replace("?",ans)}; },
+  compareBig(){ const t=ri(0,2);
+    if(t===0){ const a=ri(40,80), b=ri(11,19), c=b+pick([-1,1,0]); const ans=b>c?">":b<c?"<":"="; return {text:`${a} + ${b}  ⬜  ${a} + ${c}`, answer:ans, choices:["<","=",">"], key:"cmpBig", hint:`Both start with ${a}! Just compare ${b} and ${c}.`, explain:`${b} ${ans} ${c}, so ${a}+${b} ${ans} ${a}+${c}`}; }
+    if(t===1){ const a=ri(50,90), b=ri(11,19), c=b+pick([-1,1]); const ans=(a-b)>(a-c)?">":"<"; return {text:`${a} − ${b}  ⬜  ${a} − ${c}`, answer:ans, choices:["<","=",">"], key:"cmpBigSub", hint:`Taking away MORE leaves LESS! Which takes away more: ${b} or ${c}?`, explain:`${a}−${b} = ${a-b}, ${a}−${c} = ${a-c}`}; }
+    const a=ri(30,60), b=ri(20,40); const r=pick([a,a+1,a-1]); const ans=a>r?">":a<r?"<":"="; return {text:`${a} + ${b} − ${b}  ⬜  ${r}`, answer:ans, choices:["<","=",">"], key:"cmpBigSame", hint:`Add ${b}, then take ${b} away… you're back to ${a}!`, explain:`${a} + ${b} − ${b} = ${a}`};
+  },
+  money(){ const F=pick(FRIENDS), t=ri(0,2);
+    if(t===0){ const d=ri(2,8), p=ri(0,9), have=d*10+p, spend=ri(11,have-1); return {word:true, text:`${F[0]} had ${d} dimes and ${p} pennies. ${F[1][0].toUpperCase()+F[1].slice(1)} spent ${spend}¢. How many cents are left?`, answer:have-spend, key:"money", visual:coins(d,p), hint:`A dime is 10¢. ${d} dimes + ${p} pennies = ${have}¢. Then ${have} − ${spend}.`, explain:`${have}¢ − ${spend}¢ = ${have-spend}¢`}; }
+    if(t===1){ const d=ri(1,6), p=ri(1,9); return {text:"How many cents?", answer:d*10+p, key:"coins", visual:coins(d,p), hint:`Count dimes by 10s: ${[...Array(d)].map((_,i)=>10*(i+1)).join(", ")}. Then add ${p} pennies.`, explain:`${d*10} + ${p} = ${d*10+p}¢`}; }
+    const p=ri(11,19); return {text:`Trade 10 pennies for a dime!\n${p} pennies = 1 dime and ? pennies`, answer:p-10, key:"trade", visual:coins(0,p), hint:`Take 10 pennies away to make 1 dime. How many pennies are left?`, explain:`${p} − 10 = ${p-10}`};
+  },
+  words(){
+    const th=pick(THINGS), F=pick(FRIENDS), G2=pick(FRIENDS.filter(x=>x!==F)), f=F[0], g=G2[0], n=S.name||"Kira", t=ri(0,5); let a,b,q;
+    if(t===0){ a=ri(5,40); b=ri(3,20); q={text:`${n} has ${a} ${th}. ${f} gives ${n} ${b} more. How many ${th} does ${n} have now?`, answer:a+b, explain:`${a} + ${b} = ${a+b}`, hint:"“More” means put together. Add!"}; }
+    else if(t===1){ a=ri(15,60); b=ri(3,a-5); q={text:`${a} ${th} were at the beach. ${b} of them went away. How many are still there?`, answer:a-b, explain:`${a} − ${b} = ${a-b}`, hint:"“Went away” means take away. Subtract!"}; }
+    else if(t===2){ b=ri(3,15); const c=b+ri(4,30); q={text:`${f} had some ${th}. Then ${F[1]} got ${b} more. Now ${F[1]} has ${c}. How many did ${f} have at first?`, answer:c-b, explain:`${c} − ${b} = ${c-b}`, hint:`? + ${b} = ${c}. Take ${b} away from ${c}.`}; }
+    else if(t===3){ a=ri(5,30); b=ri(2,15); q={text:`${f} has ${a} ${th}. ${g} has ${b} more than ${f}. How many ${th} does ${g} have?`, answer:a+b, explain:`${a} + ${b} = ${a+b}`, hint:`${g} has the same as ${f} AND ${b} more.`}; }
+    else if(t===4){ a=ri(15,60); b=ri(4,a-3); q={text:`${f} has ${a} ${th}. ${g} has ${b}. How many more ${th} does ${f} have than ${g}?`, answer:a-b, explain:`${a} − ${b} = ${a-b}`, hint:"“How many more” means find the difference. Subtract!"}; }
+    else { const was=ri(4,9), now=was+ri(2,6); q={text:`Two years ago, ${f} was ${was} years old. How old will ${F[1]} be in ${now-was} years from now?`, answer:was+2+(now-was), explain:`${was} + 2 = ${was+2} now. ${was+2} + ${now-was} = ${was+2+now-was}`, hint:`First find the age NOW: ${was} + 2. Then add ${now-was}.`}; }
+    q.word=true; q.key="word"; return q;
+  },
+  skip(){ const by=pick([2,5,10,3,4]), start=by*ri(0,4), seq=[0,1,2,3,4].map(i=>start+by*(i+1)), hi=ri(2,4), ans=seq[hi];
+    return {text:`Count by ${by}s:\n${seq.map((v,i)=>i===hi?"?":v).join(",  ")}`, answer:ans, key:`skip${by}`, hint:`Each hop adds ${by}. ${seq[hi-1]} + ${by} = ?`, explain:seq.join(", ")}; },
+  plates(){ const g=ri(2,5), e=ri(0,5), em=pick(["🍪","🍓","🧁","🍩"]);
+    return {text:`${g} plates with ${e} on each.\n${g} × ${e} = ?`, answer:g*e, key:`${Math.min(g,e)}x${Math.max(g,e)}`, visual:groupsVisual(g,e,em),
+      hint: e===0 ? `Every plate is empty! ${g} groups of 0 is…` : `Add ${e} again and again, ${g} times: ${Array(g).fill(e).join(" + ")}`, explain:`${g} × ${e} = ${g*e}`}; },
+  cross(){ const a=ri(1,5), b=ri(1,4); return {text:`How many crossings?\n${a} × ${b} = ?`, answer:a*b, key:`${Math.min(a,b)}x${Math.max(a,b)}`, visual:crossLines(a,b,false),
+      hint:`${a} blue lines, ${b} pink lines. Each blue line crosses ${b} pink lines. Count the dots!`, hintVis:crossLines(a,b,true), explain:`${a} × ${b} = ${a*b}`}; },
+  area(){ const r=ri(2,5), c=ri(2,6), t=ri(0,1);
+    if(t===0) return {text:`How many squares cover it?\n${r} rows of ${c}`, answer:r*c, key:`${Math.min(r,c)}x${Math.max(r,c)}`, visual:areaVisual(r,c), hint:`Count by ${c}s for each row: ${[...Array(r)].map((_,i)=>c*(i+1)).join(", ")}`, explain:`${r} × ${c} = ${r*c}`};
+    const em=pick(EMOJI); return {text:`${r} rows of ${c} = ?`, answer:r*c, key:`${Math.min(r,c)}x${Math.max(r,c)}`, visual:arrayVisual(r,c,em), hint:`Count by ${c}s: ${[...Array(r)].map((_,i)=>c*(i+1)).join(", ")}`, explain:`${r} × ${c} = ${r*c}`}; },
+  times1(){ const b=pick([0,1,2,10,2,10,1]), a=ri(0,10), [x,y]=Math.random()<.5?[a,b]:[b,a];
+    const h = b===0||a===0 ? "Anything times 0 is 0 — zero groups means nothing at all!" : b===1||a===1 ? "Times 1 means just ONE group, so the number stays the same!" : b===2||a===2 ? `Times 2 is double! ${Math.max(a,b===2?a:b)} + ${Math.max(a,b===2?a:b)}.` : `Times 10: count by 10s ${b===10?a:b} times.`;
+    return {text:`${x} × ${y} = ?`, answer:x*y, key:`${Math.min(x,y)}x${Math.max(x,y)}`, hint:h, hintVis:x>0&&y>0&&x<=5&&y<=5?groupsVisual(x,y,"●"):"", explain:`${x} × ${y} = ${x*y}`}; },
+  times2(){ const b=pick([3,4,5,5]), a=ri(1,10), [x,y]=Math.random()<.5?[a,b]:[b,a];
+    return {text:`${x} × ${y} = ?`, answer:x*y, key:`${Math.min(x,y)}x${Math.max(x,y)}`, hint:`Count by ${b}s, ${a} times: ${[...Array(a)].map((_,i)=>b*(i+1)).join(", ")}`, explain:`${x} × ${y} = ${x*y}`}; },
+  missFactor(){ const b=pick([2,3,4,5,10]), a=ri(0,6), t=ri(0,1);
+    if(t===0) return {text:`${b} × ? = ${a*b}`, answer:a, key:`?x${b}`, hint:`How many ${b}s make ${a*b}? Count by ${b}s until you reach ${a*b}.`, explain:`${b} × ${a} = ${a*b}`};
+    return {text:`? × ${b} = ${a*b}`, answer:a, key:`?x${b}`, hint:a===0?`What times ${b} gives 0? Zero groups!`:`Count by ${b}s: ${[...Array(a)].map((_,i)=>b*(i+1)).join(", ")}… how many hops?`, explain:`${a} × ${b} = ${a*b}`};
+  }
+};
+
+/* ============ worlds & levels ============ */
+const WORLDS = [
+  {name:"Ten Town", e:"🏡", color:"#ffe9a8", boss:"🐙", bossName:"Octo-Muddle", story:"Octo-Muddle scrambled all the numbers in Ten Town! Fix them!"},
+  {name:"Twenty Forest", e:"🌲", color:"#c8f5d2", boss:"🐲", bossName:"Dragon Doozle", story:"Dragon Doozle hid the numbers between 10 and 20 in the trees."},
+  {name:"Column Canyon", e:"🏜️", color:"#ffd9b3", boss:"🦂", bossName:"Scorpio Swap", story:"Stack the numbers in columns and climb the canyon walls!"},
+  {name:"Puzzle Planet", e:"🪐", color:"#d9d2ff", boss:"👽", bossName:"Captain X", story:"Captain X hides behind letters. Find X to save the planet!"},
+  {name:"Times Castle", e:"🏰", color:"#ffd6e8", boss:"👾", bossName:"Glitch King", story:"The Glitch King broke the times tables. Rebuild them to become a Math PRO!"}
+];
+const LEVELS = [
+  {w:0,name:"Friends of 10",e:"🤝",gen:["bonds10"]},{w:0,name:"Add to 10",e:"➕",gen:["add10"]},{w:0,name:"Take away to 10",e:"➖",gen:["sub10"]},
+  {w:0,name:"Boss!",e:"🐙",gen:["bonds10","add10","sub10"],boss:true},
+  {w:1,name:"Make a 10",e:"🔟",gen:["make10"]},{w:1,name:"Add to 20",e:"🌟",gen:["add20"]},{w:1,name:"Take away to 20",e:"🍂",gen:["sub20"]},
+  {w:1,name:"Fact families",e:"👨‍👩‍👧",gen:["family"]},{w:1,name:"Croc compare",e:"🐊",gen:["compare"]},
+  {w:1,name:"Boss!",e:"🐲",gen:["make10","add20","sub20","family"],boss:true},
+  {w:2,name:"Martian numbers",e:"👾",gen:["martian"]},{w:2,name:"Quick tens",e:"⚡",gen:["mental"]},{w:2,name:"Column add",e:"🧱",gen:["colAdd"]},
+  {w:2,name:"Carry the 1",e:"🪙",gen:["colCarry"]},{w:2,name:"Column take away",e:"⛏️",gen:["colSub"]},{w:2,name:"Borrow a ten",e:"🔁",gen:["colBorrow"]},
+  {w:2,name:"Lost digits",e:"🔍",gen:["missDigit"]},{w:2,name:"Boss!",e:"🦂",gen:["colCarry","colBorrow","missDigit","mental"],boss:true},
+  {w:3,name:"Find X",e:"❎",gen:["xEq"]},{w:3,name:"Balance scale",e:"⚖️",gen:["balance"]},{w:3,name:"Number chains",e:"⛓️",gen:["chains"]},
+  {w:3,name:"Parentheses",e:"🫧",gen:["parens"]},{w:3,name:"Big compare",e:"🐊",gen:["compareBig"]},{w:3,name:"Dimes & pennies",e:"💰",gen:["money"]},
+  {w:3,name:"Story problems",e:"📖",gen:["words"]},{w:3,name:"Boss!",e:"👽",gen:["xEq","balance","chains","parens","money"],boss:true},
+  {w:4,name:"Skip counting",e:"🐸",gen:["skip"]},{w:4,name:"Cookie plates",e:"🍪",gen:["plates"]},{w:4,name:"Crossing lines",e:"✳️",gen:["cross"]},
+  {w:4,name:"Area & arrays",e:"🔲",gen:["area"]},{w:4,name:"× 0, 1, 2, 10",e:"✖️",gen:["times1"]},{w:4,name:"× 3, 4, 5",e:"🎯",gen:["times2"]},
+  {w:4,name:"Missing factor",e:"❓",gen:["missFactor"]},{w:4,name:"FINAL BOSS!",e:"👾",gen:["plates","cross","times1","times2","missFactor"],boss:true}
+];
+const SKILL_NAMES = {bonds10:"Number bonds to 10",add10:"Adding within 10",sub10:"Subtracting within 10",make10:"Make-a-10",add20:"Adding within 20",sub20:"Subtracting within 20",
+  family:"Fact families",compare:"Comparing (< > =)",martian:"Place value (Martian numbers)",mental:"Mental math with tens",colAdd:"Column addition",colCarry:"Column addition with carrying",
+  colSub:"Column subtraction",colBorrow:"Column subtraction with borrowing",missDigit:"Missing digits",xEq:"Equations with X",balance:"Balance scale",chains:"Number chains",
+  parens:"Parentheses",compareBig:"Comparing expressions",money:"Money (dimes & pennies)",words:"Word problems",skip:"Skip counting",plates:"Equal groups",cross:"Multiplication (crossing lines)",
+  area:"Area & arrays",times1:"× 0, 1, 2, 10",times2:"× 3, 4, 5",missFactor:"Missing factor"};
+/* Pip's quick lessons for each new skill */
+const LESSONS = {
+  bonds10:{t:"Friends of 10",v:()=>bondVisual(10,7,3)+tenFrames(7,3),x:"Two numbers that make 10 are friends! 7 and 3 fill the ten-frame. Find the missing friend."},
+  add10:{t:"Adding",v:()=>tenFrames(4,3),x:"Pink + blue = all of them together. 4 + 3 = 7."},
+  sub10:{t:"Taking away",v:()=>tenFrames(8,0,3),x:"Start with 8, cross out 3. Count what's left: 5!"},
+  make10:{t:"Make a 10!",v:()=>tenFrames(8,5),x:"8 + 5: give 2 to the 8 to make 10. 3 are left over. 10 + 3 = 13! Fill the ten first — it's a superpower."},
+  add20:{t:"Adding to 20",v:()=>numberLine(9,6),x:"Hop forward on the number line, or make a 10 first."},
+  sub20:{t:"Taking away to 20",v:()=>numberLine(14,-6),x:"Hop back. Or think addition: 6 + ? = 14. That's 8!"},
+  family:{t:"Fact families",v:()=>bondVisual(12,5,7),x:"5, 7 and 12 live together: 5+7=12, 7+5=12, 12−7=5, 12−5=7. Know one, know them all!"},
+  compare:{t:"Croc compare 🐊",v:()=>'<span style="font-size:60px">9 > 5 &nbsp; 3 < 8</span>',x:"The crocodile is hungry — its mouth always opens toward the BIGGER number!"},
+  martian:{t:"Martian numbers",v:()=>martian(34),x:"Martians write tens as rods ▮ and ones as dots •. 3 rods and 4 dots = 34!"},
+  mental:{t:"Quick tens",v:()=>blocksVisual(73)+'<b style="font-size:36px">−</b>'+blocksVisual(23),x:"73 − 23: the ones are the same (3 − 3 = 0). Tens: 7 − 2 = 5. Answer: 50!"},
+  colAdd:{t:"Column addition",v:()=>renderColumn({col:{top:46,bot:11,op:"+",res:57}},"57"),x:"Line up tens over tens and ones over ones. Always start with the ONES (right side)."},
+  colCarry:{t:"Carry the 1",v:()=>renderColumn({col:{top:47,bot:48,op:"+",res:95,carry:["1",""]}},"95",true),x:"7 + 8 = 15 ones. That's 1 ten and 5 ones! Write 5, and carry the 1 ten on top. Like trading 10 pennies for a dime!"},
+  colSub:{t:"Column take away",v:()=>renderColumn({col:{top:86,bot:31,op:"−",res:55}},"55"),x:"Ones first: 6 − 1 = 5. Then tens: 8 − 3 = 5. Answer 55."},
+  colBorrow:{t:"Borrow a ten",v:()=>renderColumn({col:{top:52,bot:27,op:"−",res:25,carry:["","10+"]}},"25",true),x:"2 − 7? Not enough ones! Borrow 1 ten: now 12 − 7 = 5. The tens go from 5 to 4: 4 − 2 = 2. Answer 25!"},
+  missDigit:{t:"Lost digits",v:()=>renderColumn({col:{top:13,bot:12,op:"+",res:25,hide:{row:"b",i:1}}},""),x:"A digit got lost! Look at the ones column: 3 + ? = 5. The lost digit is 2!"},
+  xEq:{t:"Find X",v:()=>bondVisual(35,"X",30),x:"X + 30 = 35. X is a missing part. Whole − part = other part: 35 − 30 = 5. X = 5!"},
+  balance:{t:"Balance scale",v:()=>balance("X + 3",7),x:"A balanced scale means both sides are equal. Take 3 off both sides: X = 4."},
+  chains:{t:"Number chains",v:()=>'<span style="font-size:44px;font-weight:900">20 + 2 − 1</span>',x:"Go left to right like reading: 20 + 2 = 22, then 22 − 1 = 21."},
+  parens:{t:"Parentheses",v:()=>'<span style="font-size:44px;font-weight:900">9 − (5 − 2)</span>',x:"Parentheses say: DO ME FIRST! 5 − 2 = 3. Then 9 − 3 = 6."},
+  compareBig:{t:"Smart compare",v:()=>'<span style="font-size:38px;font-weight:900">68 + 17 ⬜ 68 + 16</span>',x:"Don't add everything! Both have 68. 17 is bigger than 16, so the left side is bigger: >"},
+  money:{t:"Dimes & pennies",v:()=>coins(4,8),x:"A dime is 10¢, a penny is 1¢. 4 dimes and 8 pennies = 48¢. 10 pennies can trade for 1 dime!"},
+  words:{t:"Story problems",v:()=>'<span style="font-size:60px">📖🤔➕➖</span>',x:"Read carefully. “More”, “in all”, “together” → add. “Left”, “went away”, “how many more” → subtract. Tap 🔊 to hear it!"},
+  skip:{t:"Skip counting",v:()=>'<span style="font-size:36px;font-weight:900">5, 10, 15, 20, 25</span>',x:"Skip counting is hopping by the same number. It's the secret key to multiplication!"},
+  plates:{t:"Equal groups",v:()=>groupsVisual(3,4,"🍪"),x:"3 plates with 4 cookies each: 4 + 4 + 4 = 12. We write it 3 × 4 = 12. × means “groups of”!"},
+  cross:{t:"Crossing lines",v:()=>crossLines(2,3,true),x:"2 blue lines × 3 pink lines = 6 crossings. Each blue line crosses all 3 pink lines!"},
+  area:{t:"Area & arrays",v:()=>areaVisual(3,4),x:"Area = how many squares cover a shape. 3 rows of 4 squares = 3 × 4 = 12."},
+  times1:{t:"Super-easy times",v:()=>'<span style="font-size:32px;font-weight:900">5 × 0 = 0 &nbsp; 5 × 1 = 5<br>5 × 2 = 10 &nbsp; 5 × 10 = 50</span>',x:"× 0 → zero. × 1 → stays the same. × 2 → double it. × 10 → count by tens!"},
+  times2:{t:"× 3, 4, 5",v:()=>'<span style="font-size:32px;font-weight:900">5, 10, 15, 20, 25…</span>',x:"Count by 5s like a clock! For × 3 and × 4, skip count too: 4, 8, 12, 16…"},
+  missFactor:{t:"Missing factor",v:()=>groupsVisual(4,5,"●"),x:"4 × ? = 20. How many hops of 4 make 20? 4, 8, 12, 16, 20 — five hops! ? = 5."}
+};
+const STICKERS = ["🦄","🐼","🦊","🐯","🐨","🐸","🦋","🐳","🦁","🐧","🌈","🍩","🧁","🍉","🚀","🎸","🏆","💎","🌻","🐙","🦕","🎠","🪐","🍭","🐬","🦩","🐝","🎨","🧸","👑","🦒","🐢","🌮","🎡","🏰","🍦","⚽","🎮","🐞","🦔"];
+const CHEERS = ["Awesome!","Super!","You got it!","Brilliant!","Wow!","Math star!","Amazing!","Yes!!","Genius!","On fire!","Boom!","Perfect!"];
+const QPL = 8;
+
+/* ============ screens ============ */
+function show(id){
+  $("toast").classList.remove("show");
+  document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("active", s.id===id));
+  if(id==="map") renderMap();
+  window.scrollTo(0,0);
+}
+document.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>show(b.dataset.go));
+function applyTheme(){ document.body.className = S.theme || ""; }
+
+/* family code */
+$("codeBtn").onclick = ()=>{
+  if(hash($("codeIn").value.trim().toUpperCase())===FAMILY_HASH){ S.familyOk=true; save(); sfx.win(); boot(); }
+  else { sfx.bad(); $("codeIn").value=""; $("codeIn").style.borderColor="#ff6b6b"; }
+};
+$("codeIn").addEventListener("keydown",e=>{ if(e.key==="Enter") $("codeBtn").click(); });
+
+/* welcome */
+const AVATARS=["hero:girl","🦄","🐱","🐶","🐰","🦊","🐼","🐯","👸","🧚","🦸‍♀️","🧜‍♀️","🐬"];
+function renderWelcome(){
+  $("welcomeHero").innerHTML = S.avatar==="hero:girl" ? heroSVG(true) : "";
+  $("nameInput").value=S.name; $("petName").value=S.petName;
+  $("avatarPick").innerHTML=AVATARS.map(a=>`<button class="${a===S.avatar?'sel':''}">${avatarHTML(a)}</button>`).join("");
+  [...$("avatarPick").children].forEach((b,i)=>b.onclick=()=>{ S.avatar=AVATARS[i]; sfx.tap(); renderWelcome(); });
+  const keys=Object.keys(PETS);
+  $("petPick").innerHTML=keys.map(k=>`<button class="${k===S.pet?'sel':''}" title="${PETS[k].label}">${PETS[k].stages[3]}</button>`).join("");
+  [...$("petPick").children].forEach((b,i)=>b.onclick=()=>{ S.pet=keys[i]; sfx.tap(); renderWelcome(); });
+}
+$("startBtn").onclick=()=>{
+  const n=$("nameInput").value.trim(); if(!n){ $("nameInput").focus(); $("nameInput").style.borderColor="#ff6b6b"; return; }
+  S.name=n.charAt(0).toUpperCase()+n.slice(1); S.petName=($("petName").value.trim()||"Sparky"); save(); sfx.win(); say(`Welcome ${S.name}! Let's go on a math quest!`); show("map");
+};
+
+/* map */
+function totalStars(){ return Object.values(S.stars).reduce((a,b)=>a+b,0); }
+function renderMap(){
+  applyTheme();
+  $("mapHero").innerHTML=`${avatarHTML(S.avatar)} ${S.name}`; $("mapCoins").textContent=`🪙 ${S.coins}`; $("mapStars").textContent=`⭐ ${totalStars()} / ${LEVELS.length*3}`;
+  $("soundBtn").textContent=S.sound?"🔊":"🔇"; $("musicBtn").textContent=S.music?"🎵":"🎵🚫";
+  $("chestBtn").style.display = S.chest===today() ? "none" : "";
+  const missed=Object.values(S.missed).filter(v=>v>0).length; $("practiceBtn").style.display = missed ? "" : "none";
+  const st=petStage(); $("mapPet").innerHTML=petHTML(); $("mapPet").className="pet bob"+(st===4?" legend":"");
+  $("petTitle").textContent=`${S.petName||"Your pet"} — ${STAGE_NAMES[st]} ${PETS[S.pet].label}`;
+  const nx=STAGE_XP[st+1]; $("xpFill").style.width = nx ? (100*(S.xp-STAGE_XP[st])/(nx-STAGE_XP[st]))+"%" : "100%";
+  $("petNext").textContent = nx ? `${nx-S.xp} more right answers to grow! (XP ${S.xp})` : `Fully grown legend! XP ${S.xp}`;
+  $("rank").textContent=rankName();
+  const nextLvl=LEVELS[Math.min(S.unlocked-1,LEVELS.length-1)];
+  $("mapSay").textContent = totalStars()===LEVELS.length*3 ? `${S.name}, you got ALL the stars. You are a true Math LEGEND! 👑` :
+    S.chest!==today() ? `${S.name}, your daily treasure chest is waiting! 🎁` :
+    missed>4 ? `Tip: Power-up practice beats your tricky facts, ${S.name}!` : `Next adventure: ${nextLvl.e} ${nextLvl.name}! You can do it, ${S.name}!`;
+  let html="";
+  WORLDS.forEach((w,wi)=>{
+    const first=LEVELS.findIndex(l=>l.w===wi), wl=first>=S.unlocked;
+    html+=`<div class="world ${wl?'lockedw':''}" style="background:${w.color}"><h3>${w.e} ${w.name} ${wl?"🔒":""}</h3><div class="story">${w.story}</div><div class="levels">`;
+    LEVELS.forEach((l,li)=>{ if(l.w!==wi) return; const lock=li>=S.unlocked, s=S.stars[li]||0;
+      html+=`<button class="lvl ${lock?'locked':''} ${l.boss?'boss':''} ${li===S.unlocked-1&&!s?'next':''}" data-l="${li}"><div class="e">${lock?"🔒":l.e}</div><div class="n">${l.name}</div><div class="s">${"★".repeat(s)}${"☆".repeat(3-s)}</div></button>`; });
+    html+="</div></div>";
+  });
+  $("worlds").innerHTML=html;
+  $("wchips").innerHTML=WORLDS.map((w,wi)=>`<button style="background:${w.color}" data-w="${wi}">${w.e} ${w.name}</button>`).join("");
+  [...$("wchips").children].forEach(b=>b.onclick=()=>{ sfx.tap(); document.querySelectorAll(".world")[+b.dataset.w].scrollIntoView({behavior:"smooth",block:"start"}); });
+  document.querySelectorAll(".lvl").forEach(b=>b.onclick=()=>{ const li=+b.dataset.l; if(li<S.unlocked){ sfx.tap(); tryStart(li); } else { sfx.tap(); offerSkip(li); } });
+  const nb=document.querySelector(".lvl.next"); if(nb && !renderMap.scrolled){ renderMap.scrolled=true; setTimeout(()=>nb.scrollIntoView({block:"center",behavior:"smooth"}),300); }
+}
+$("soundBtn").onclick=()=>{ S.sound=!S.sound; save(); renderMap(); };
+$("musicBtn").onclick=()=>{ S.music=!S.music; save(); S.music?musicStart():musicStop(); renderMap(); };
+$("chestBtn").onclick=()=>{
+  if(S.chest===today()) return; S.chest=today(); const c=ri(10,25)+Math.min(20,totalStars()); S.coins+=c; save();
+  sfx.win(); confetti(40); toast(`🎁 +${c} coins!`,"#ffbf1f"); say(`Treasure! You got ${c} coins!`); renderMap();
+};
+$("practiceBtn").onclick=()=>tryStart(-1);
+$("stickersBtn").onclick=()=>{
+  $("stickerGrid").innerHTML=STICKERS.map(s=>S.stickers.includes(s)?`<div>${s}</div>`:`<div class="empty">?</div>`).join("");
+  $("stickerCount").textContent=`${S.stickers.length} / ${STICKERS.length}`; show("stickers");
+};
+
+/* jump ahead with a skip test */
+let skipTarget=-1;
+function offerSkip(li){
+  skipTarget=li; const L=LEVELS[li];
+  $("skipTitle").textContent=`Jump ahead to ${L.e} ${L.name}?`;
+  $("skipText").textContent=`Pass a quick challenge: 6 questions from this level. Get 5 right on the first try and everything up to here unlocks!`;
+  $("skipModal").classList.add("show"); say($("skipTitle").textContent);
+}
+$("skipNo").onclick=()=>$("skipModal").classList.remove("show");
+$("skipGo").onclick=()=>{ $("skipModal").classList.remove("show"); tryStart(skipTarget,true); };
+
+/* my progress (for the kid) */
+function dayKey(offset){ const d=new Date(); d.setDate(d.getDate()-offset); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+function dayStreak(){ let n=0, off=S.history[today()]?0:1; while(S.history[dayKey(off)]){ n++; off++; } return n; }
+function logAnswer(right){ const k=today(), h=S.history[k]=S.history[k]||{q:0,r:0}; h.q++; if(right) h.r++;
+  const keys=Object.keys(S.history); if(keys.length>60){ keys.sort((a,b)=>new Date(a)-new Date(b)).slice(0,keys.length-60).forEach(k=>delete S.history[k]); } }
+function renderProgress2(){
+  const done=Object.keys(S.stars).length, totalQ=Object.values(S.history).reduce((a,h)=>a+h.q,0);
+  $("pgRank").textContent=rankName();
+  $("pgTop").innerHTML=`<div>⭐ ${totalStars()}<br><small>stars</small></div><div>🏁 ${done}/${LEVELS.length}<br><small>levels</small></div><div>🔥 ${dayStreak()}<br><small>day streak</small></div><div>🧠 ${totalQ}<br><small>answers</small></div>`;
+  $("pgWorlds").innerHTML=WORLDS.map((w,wi)=>{ const ls=LEVELS.map((l,i)=>i).filter(i=>LEVELS[i].w===wi), got=ls.reduce((a,i)=>a+(S.stars[i]||0),0), max=ls.length*3;
+    return `<div class="prow"><span style="width:190px">${w.e} ${w.name}</span><div class="pbar"><div style="width:${100*got/max}%"></div></div><span>${got}/${max}⭐</span></div>`; }).join("");
+  let days=""; const mx=Math.max(1,...[0,1,2,3,4,5,6].map(o=>(S.history[dayKey(o)]||{q:0}).q));
+  for(let o=6;o>=0;o--){ const h=S.history[dayKey(o)]||{q:0}, d=new Date(); d.setDate(d.getDate()-o);
+    days+=`<div class="d"><span>${h.q||""}</span><div style="height:${100*h.q/mx}px"></div><span>${o===0?"Today":["Sun","Mon","Tue","Wed","Thu","Fri","Sat"][d.getDay()]}</span></div>`; }
+  $("pgDays").innerHTML=days;
+  $("pgSkills").innerHTML=Object.keys(SKILL_NAMES).map(k=>{ const st=S.stats[k]; if(!st) return `<div class="empty" style="font-size:13px;color:#999">🔒<small>${SKILL_NAMES[k]}</small></div>`;
+    const n=st.r+st.w, p=st.r/n, b = p>=0.9&&n>=8 ? "⭐" : p>=0.7 ? "👍" : "🌱";
+    return `<div style="font-size:40px">${b}<small style="text-align:center">${SKILL_NAMES[k]}<br>${Math.round(100*p)}%</small></div>`; }).join("");
+}
+$("progressBtn").onclick=()=>{ renderProgress2(); show("progressScr"); };
+
+/* shop */
+function renderShop(){
+  $("shopCoins").textContent=`🪙 ${S.coins}`; $("shopPet").innerHTML=(S.avatar==="hero:girl"?`<span style="display:inline-block;width:110px;height:132px;font-size:0">${heroSVG(true).replace('class="hero-av"','width="110" height="132"')}</span>`:"")+petHTML(); $("shopPet").className="pet bob";
+  $("shopAcc").innerHTML=[["",0]].concat(ACCS).map(([a,p])=>{ const own=!a||S.owned.includes(a), on=S.acc===a;
+    return `<div data-a="${a}" data-p="${p}" style="cursor:pointer;${on?'outline:4px solid #7c5cff':''}">${a||"🚫"}<small>${on?"Wearing":own?"Wear":"🪙 "+p}</small></div>`; }).join("");
+  $("shopThemes").innerHTML=THEMES.map(([c,n,p])=>{ const own=!p||S.owned.includes(c), on=S.theme===c;
+    return `<div data-t="${c}" data-p="${p}" style="cursor:pointer;font-size:20px;font-weight:900;${on?'outline:4px solid #7c5cff':''}">${n}<small>${on?"On":own?"Use":"🪙 "+p}</small></div>`; }).join("");
+  $("shopOutfits").innerHTML=Object.entries(OUTFITS).map(([k,o])=>{ const own=!o.price||S.owned.includes("o:"+k), on=S.outfit===k&&S.avatar==="hero:girl";
+    return `<div data-o="${k}" style="cursor:pointer;${on?'outline:4px solid #7c5cff':''}"><div style="width:84px;height:100px">${heroOutfitSVG(k,true).replace('class="hero-av"','width="84" height="100"')}</div><small>${o.name}</small><small>${on?"Wearing":own?"Wear":"🪙 "+o.price}</small></div>`; }).join("");
+  [...$("shopOutfits").children].forEach(d=>d.onclick=()=>{ const k=d.dataset.o, o=OUTFITS[k];
+    if(o.price && !S.owned.includes("o:"+k)){ if(S.coins<o.price){ sfx.bad(); toast(`Need ${o.price-S.coins} more 🪙`,"#ff6b6b"); return; } S.coins-=o.price; S.owned.push("o:"+k); sfx.coin(); confetti(20); toast("New outfit! 👗","#22b573"); say(`Ooh! ${o.name}!`); } else sfx.tap();
+    S.outfit=k; S.avatar="hero:girl"; save(); renderShop(); });
+  [...$("shopAcc").children].forEach(d=>d.onclick=()=>buy(d.dataset.a,+d.dataset.p,"acc"));
+  [...$("shopThemes").children].forEach(d=>d.onclick=()=>buy(d.dataset.t,+d.dataset.p,"theme"));
+}
+function buy(item,price,kind){
+  const own = !price || S.owned.includes(item);
+  if(!own){ if(S.coins<price){ sfx.bad(); toast(`Need ${price-S.coins} more 🪙`,"#ff6b6b"); return; } S.coins-=price; S.owned.push(item); sfx.coin(); confetti(15); toast("Bought it!","#22b573"); }
+  else sfx.tap();
+  S[kind]=item; save(); applyTheme(); renderShop();
+}
+$("shopBtn").onclick=()=>{ renderShop(); show("shop"); };
+
+/* play time limit */
+function trackPlay(ms){ if(S.playDay!==today()){ S.playDay=today(); S.playMs=0; } S.playMs+=ms; }
+function overLimit(){ return S.limit>0 && S.playDay===today() && S.playMs >= S.limit*60000; }
+function tryStart(li,skip){ if(overLimit()){ show("break"); return; } startLevel(li,skip); }
+$("breakParent").onclick=()=>openGate(()=>{ S.playMs=0; save(); show("map"); });
+
+/* ============ gameplay ============ */
+let G=null;
+function makeQ(genName){ const q=GEN[genName](); q.gen=genName; return q; }
+function startLevel(li,skip){
+  const qs=[]; const NQ = skip ? 6 : QPL;
+  if(li===-1){
+    const keys=Object.entries(S.missed).filter(([,v])=>v>0).map(([k])=>k);
+    const gens=[...new Set(Object.entries(S.stats).filter(([,s])=>s.w>0).map(([g])=>g))];
+    for(let t=0; qs.length<NQ && t<1500; t++){ const g=pick(gens.length?gens:["make10"]), q=makeQ(g); if(keys.includes(q.key) || t>900) qs.push(q); }
+  } else {
+    const L=LEVELS[li]; let last="";
+    for(let t=0; qs.length<NQ && t<200; t++){ const q=makeQ(L.gen[qs.length % L.gen.length]); const sig=q.text+JSON.stringify(q.col||""); if(sig!==last){ qs.push(q); last=sig; } }
+    if(L.gen.length>1) shuffle(qs);
+  }
+  G={li, skip:!!skip, stage0:petStage(), qs, i:0, firstTry:0, attempts:0, streak:0, best:0, earned:0, xp:0, results:[], requeued:0, input:"", t0:Date.now()};
+  const isBoss = li>=0 && LEVELS[li].boss;
+  $("lvlTitle").textContent = li===-1 ? "💪 Power-up practice" : (skip?"🚀 Skip test: ":"")+`${WORLDS[LEVELS[li].w].e} ${LEVELS[li].name}`;
+  $("bossBox").style.display = isBoss ? "flex" : "none";
+  if(isBoss){ const w=WORLDS[LEVELS[li].w]; $("bossM").textContent=w.boss; $("bossName").textContent=w.bossName; }
+  $("buddy").innerHTML=petHTML();
+  // first time this skill? show Pip's lesson
+  const g = li>=0 && !LEVELS[li].boss ? LEVELS[li].gen[0] : null;
+  if(g && LESSONS[g] && !S.seenLesson[g]){ showLesson(g); return; }
+  show("play"); nextQuestion();
+}
+let lessonGen=null;
+function showLesson(g){ lessonGen=g; const L=LESSONS[g]; $("lsTitle").textContent=L.t; $("lsVis").innerHTML=L.v(); $("lsText").textContent=L.x; show("lesson"); setTimeout(()=>say(L.t+". "+L.x),300); }
+$("lsSay").onclick=()=>{ const L=LESSONS[lessonGen]; say(L.x); };
+$("lsGo").onclick=()=>{ S.seenLesson[lessonGen]=true; save(); if(window.speechSynthesis) speechSynthesis.cancel(); show("play"); nextQuestion(); };
+
+function renderProgress(){
+  let h=""; for(let i=0;i<G.qs.length;i++){ const r=G.results[i]; h+=`<div class="dot ${r===true?'ok':r===false?'miss':i===G.i?'cur':''}"></div>`; }
+  $("progress").innerHTML=h; $("streak").textContent=`🔥 ${G.streak}`; $("coins").textContent=`🪙 ${S.coins}`;
+  if($("bossBox").style.display!=="none"){ const done=G.results.filter(r=>r===true).length; $("bossHp").style.width=Math.max(0,100-100*done/(G.skip?6:QPL))+"%"; }
+}
+function nextQuestion(){
+  if(G.i>=G.qs.length) return finishLevel();
+  const q=G.qs[G.i]; G.q=q; G.attempts=0; G.input=""; G.locked=false;
+  $("visual").innerHTML = q.col ? renderColumn(q,"") : (q.visual||"");
+  $("qtext").textContent=q.text; $("qtext").className="qtext"+(q.word?" word":""); $("qtext").style.display=q.text?"":"none";
+  $("hint").className="hint"; $("hint").innerHTML=""; $("gotItBtn").style.display="none";
+  if(q.choices){
+    $("answerArea").innerHTML=`<div class="choices">${q.choices.map(c=>`<button class="choice">${c}</button>`).join("")}</div>`;
+    [...$("answerArea").querySelectorAll(".choice")].forEach(b=>b.onclick=()=>submit(b.textContent));
+    $("pad").style.display="none";
+  } else {
+    $("answerArea").innerHTML = q.col ? "" : `<div class="answer-box" id="ans">&nbsp;</div>`;
+    $("pad").style.display="";
+  }
+  renderProgress();
+  if(q.word) setTimeout(()=>say(q.text),300);
+}
+function updateAns(){
+  const q=G.q;
+  if(q.col){ $("visual").innerHTML=renderColumn(q,G.input,G.attempts>0); return; }
+  const a=$("ans"); if(a){ a.textContent=G.input||"\u00a0"; a.classList.remove("bad-shake","ok-glow"); }
+}
+function buildPad(){
+  const w=window.innerWidth;
+  const keys = w>900 ? ["7","8","9","4","5","6","1","2","3","⌫","0","✓"]          // calculator style beside the question
+             : w>520 ? ["1","2","3","4","5","⌫","6","7","8","9","0","✓"]          // two rows under the question (tablet)
+             :         ["1","2","3","⌫","4","5","6","0","7","8","9","✓"];         // phone
+  buildPad.w = w>900?3:w>520?2:1;
+  $("pad").innerHTML=keys.map(k=>`<button class="key ${k==='✓'?'go':k==='⌫'?'del':''}">${k}</button>`).join("");
+  [...$("pad").children].forEach(b=>b.onclick=()=>press(b.textContent));
+}
+function press(k){
+  if(!G||!G.q||G.q.choices||G.locked||$("gotItBtn").style.display!=="none") return;
+  const max = G.q.col ? (G.q.col.hide?1:String(G.q.col.res).length) : 3;
+  if(k==="⌫"){ G.input=G.input.slice(0,-1); sfx.tap(); }
+  else if(k==="✓"){ if(G.input!=="") submit(G.input); return; }
+  else if(G.input.length<max){ G.input = (G.input==="0" ? "" : G.input) + k; sfx.tap(); }
+  updateAns();
+}
+document.addEventListener("keydown",e=>{
+  if(!$("play").classList.contains("active")) return;
+  if(/^[0-9]$/.test(e.key)) press(e.key);
+  else if(e.key==="Backspace"){ e.preventDefault(); press("⌫"); }
+  else if(e.key==="Enter"){ if($("gotItBtn").style.display!=="none") $("gotItBtn").click(); else press("✓"); }
+  else if(G&&G.q&&G.q.choices&&["<",">","="].includes(e.key)) submit(e.key);
+});
+function toast(text,color){ const t=$("toast"); t.textContent=text; t.style.color=color||"#fff"; t.classList.add("show"); clearTimeout(toast.t); toast.t=setTimeout(()=>t.classList.remove("show"),800); }
+function confetti(n=30){ for(let i=0;i<n;i++){ const c=document.createElement("div"); c.className="confetti"; c.textContent=pick(["🎉","⭐","✨","🎊","💖","🌟","🪙"]);
+  c.style.left=Math.random()*100+"vw"; c.style.animationDuration=(1.4+Math.random()*2)+"s"; document.body.appendChild(c); setTimeout(()=>c.remove(),3800); } }
+function stat(gen,ok){ const s=S.stats[gen]=S.stats[gen]||{r:0,w:0}; ok?s.r++:s.w++; }
+function petAttack(){
+  const from=$("buddy").getBoundingClientRect(), to=$("bossM").getBoundingClientRect(), f=document.createElement("div");
+  f.className="fly"; f.textContent=pick(["🔥","⚡","💥","⭐"]); f.style.left=from.left+"px"; f.style.top=from.top+"px"; document.body.appendChild(f);
+  requestAnimationFrame(()=>{ f.style.left=to.left+20+"px"; f.style.top=to.top+10+"px"; f.style.transform="scale(1.6)"; });
+  setTimeout(()=>{ f.remove(); $("bossM").classList.remove("hit"); void $("bossM").offsetWidth; $("bossM").classList.add("hit"); sfx.hit(); },450);
+}
+function submit(val){
+  if(G.locked) return;
+  const q=G.q, ok=String(val)===String(q.answer); G.attempts++;
+  const box = q.col ? $("visual").querySelector(".col") : $("ans");
+  if(ok){
+    G.locked=true; const first=G.attempts===1;
+    if(G.results[G.i]===undefined) G.results[G.i]=first;
+    if(first){ logAnswer(true); G.firstTry++; G.streak++; G.best=Math.max(G.best,G.streak); stat(q.gen,true); if(S.missed[q.key]) S.missed[q.key]--; }
+    else G.streak=0;
+    const earn = first ? (G.streak>=5?3:G.streak>=3?2:1) : 1; S.coins+=earn; G.earned+=earn;
+    const xpGain = first?2:1; S.xp+=xpGain; G.xp+=xpGain;
+    if(box) box.classList.add("ok-glow");
+    sfx.good(G.streak); toast(first ? pick(CHEERS)+(G.streak>=3?` 🔥${G.streak}`:"") : "You fixed it! 👍","#22b573");
+    $("buddy").classList.remove("jump"); void $("buddy").offsetWidth; $("buddy").classList.add("jump");
+    if($("bossBox").style.display!=="none") petAttack();
+    if(G.streak>0 && G.streak%5===0){ confetti(25); say(`${G.streak} in a row! You're on fire!`); }
+    save(); renderProgress();
+    setTimeout(()=>{ G.i++; nextQuestion(); }, 1000);
+  } else {
+    sfx.bad(); G.streak=0;
+    if(box){ box.classList.remove("bad-shake"); void box.offsetWidth; box.classList.add("bad-shake"); }
+    if(G.attempts===1){
+      logAnswer(false); stat(q.gen,false); S.missed[q.key]=(S.missed[q.key]||0)+1; save(); G.results[G.i]=false;
+      $("hint").innerHTML=`🦉 ${q.hint||"Try again!"}`+(q.hintVis?`<div class="hv">${q.hintVis}</div>`:"");
+      $("hint").className="hint show"; if(q.hint) say("Here's a hint. "+q.hint);
+      setTimeout(()=>{ G.input=""; updateAns(); },500);
+    } else {
+      const ansText = q.col && q.col.hide ? `The lost digit is <b>${q.answer}</b>.` : `The answer is <b>${q.answer}</b>.`;
+      $("hint").innerHTML=`🦉 ${ansText} ${q.explain||""}`+(q.hintVis?`<div class="hv">${q.hintVis}</div>`:"");
+      $("hint").className="hint show"; $("gotItBtn").style.display=""; $("pad").style.display="none";
+      if(q.col && !q.col.hide){ G.input=String(q.answer); $("visual").innerHTML=renderColumn(q,G.input,true); }
+      say(`The answer is ${q.answer}. Let's try one like it again later!`);
+      if(G.requeued<3 && !G.skip){ G.qs.push(makeQ(q.gen)); G.requeued++; }
+      renderProgress();
+    }
+  }
+}
+$("gotItBtn").onclick=()=>{ G.i++; nextQuestion(); };
+$("speakBtn").onclick=()=>G&&G.q&&say(G.q.text||"Solve the column problem");
+$("quitBtn").onclick=()=>{ if(window.speechSynthesis) speechSynthesis.cancel(); if(G){ trackPlay(Date.now()-G.t0); save(); } show("map"); };
+
+function finishLevel(){
+  trackPlay(Date.now()-G.t0);
+  if(G.skip){
+    const pass=G.firstTry>=5; G.resultInfo={stars:pass?3:0,isBoss:false,final:false};
+    if(pass){ S.unlocked=Math.max(S.unlocked,G.li+1); S.coins+=10; }
+    save();
+    $("resTitle").textContent = pass ? "Skip test PASSED! 🚀" : "Almost! Not yet 💪";
+    $("resText").textContent = `${G.firstTry} of 6 right on the first try.` + (pass ? ` ${LEVELS[G.li].name} is unlocked!` : " Play the levels before to get ready — you'll get there!");
+    $("resLoot").textContent = pass ? "+10 🪙" : ""; $("resStickerLabel").textContent=""; $("resSticker").textContent = pass ? "🚀" : "🌱";
+    $("resNext").style.display = pass ? "" : "none"; $("resNext").textContent = pass ? "Play it ▶" : "Next ▶";
+    G.li = pass ? G.li-1 : G.li; // so "Play it" opens the target level
+    $("resAgain").style.display = "none";
+    showResult(); return;
+  }
+  $("resNext").textContent="Next ▶"; $("resAgain").style.display="";
+  const total=G.qs.length, pct=G.firstTry/total, stars=pct>=0.9?3:pct>=0.7?2:1;
+  const before=G.stage0; let sticker=null, firstClear=false;
+  if(G.li>=0){
+    const prev=S.stars[G.li]||0; S.stars[G.li]=Math.max(prev,stars); firstClear = prev===0;
+    S.unlocked=Math.max(S.unlocked, Math.min(LEVELS.length, G.li+2));
+    if(stars>prev){ const left=STICKERS.filter(s=>!S.stickers.includes(s)); if(left.length){ sticker=pick(left); S.stickers.push(sticker); } }
+  }
+  const bonus = stars*3 + (G.li>=0 && LEVELS[G.li].boss ? 15 : 0); S.coins+=bonus; G.earned+=bonus; save();
+  const isBoss=G.li>=0&&LEVELS[G.li].boss, final=G.li===LEVELS.length-1;
+  $("resTitle").textContent = final ? "YOU ARE A MATH PRO! 🏆" : isBoss ? `You beat ${WORLDS[LEVELS[G.li].w].bossName}! 🏆` : G.li===-1 ? "Power-up complete! 💪" : stars===3 ? "PERFECT! 🌟" : "Level complete!";
+  $("resText").textContent=`${G.firstTry} of ${total} right on the first try` + (stars<3?` — ${Math.ceil(.9*total)} gets 3 stars!`:"") + (G.best>=3?` · Best streak 🔥${G.best}`:"");
+  $("resLoot").textContent=`+${G.earned} 🪙   +${G.xp} XP for ${S.petName||"your pet"}`;
+  $("resStickerLabel").textContent = sticker ? "New sticker!" : "Great practice!";
+  $("resSticker").textContent = sticker || "🎖️";
+  $("resNext").style.display=(G.li>=0&&G.li+1<LEVELS.length)?"":"none";
+  G.resultInfo={stars,isBoss,final};
+  const after=petStage();
+  if(after>before){ S.lastStage=after; save(); showEvolve(before,after); return; }
+  showResult();
+}
+function showResult(){
+  const {stars,isBoss,final}=G.resultInfo;
+  $("resHero").innerHTML = S.avatar==="hero:girl" ? `<span class="bob">${heroSVG(true)}</span>` : "";
+  show("result"); if(G.skip) say($("resTitle").textContent);
+  const sp=[...$("resStars").children]; sp.forEach(s=>s.classList.remove("on")); sp.forEach((s,i)=>{ if(i<stars) setTimeout(()=>{ s.classList.add("on"); tone(600+i*200,.15,"triangle"); },400+i*400); });
+  sfx.win(); confetti(isBoss?90:40);
+  if(!G.skip) say(final?`You did it ${S.name}! You are a Math PRO!`: isBoss?`You beat the boss! Amazing, ${S.name}!`:`Great job, ${S.name}! ${stars} star${stars>1?"s":""}!`);
+}
+function showEvolve(b,a){
+  show("evolve"); $("evoBtn").style.display="none"; $("evoPet").textContent=PETS[S.pet].stages[b]; $("evoText").textContent="";
+  let n=0; const iv=setInterval(()=>{ $("evoPet").textContent = n%2 ? PETS[S.pet].stages[b] : PETS[S.pet].stages[a]; $("evoPet").style.transform=`scale(${1+(n%2)*0.15})`; tone(400+n*60,.1,"triangle"); n++;
+    if(n>9){ clearInterval(iv); $("evoPet").innerHTML=petHTML(); $("evoPet").style.transform="scale(1.2)"; sfx.win(); confetti(80);
+      $("evoText").textContent = a===1 ? `${S.petName} HATCHED! 🎉` : `${S.petName} grew into a ${STAGE_NAMES[a]} ${PETS[S.pet].label}!`; say($("evoText").textContent); $("evoBtn").style.display=""; } },260);
+}
+$("evoBtn").onclick=()=>showResult();
+$("resMap").onclick=()=>show("map");
+$("resAgain").onclick=()=>tryStart(G.li);
+$("resNext").onclick=()=>tryStart(G.li+1);
+
+/* ============ grown-ups ============ */
+let gateAns=0, gateThen=null;
+function openGate(then){ const a=ri(6,9), b=ri(6,9); gateAns=a*b; gateThen=then; $("gateQ").textContent=`What is ${a} × ${b}?`; $("gateIn").value=""; $("gate").classList.add("show"); setTimeout(()=>$("gateIn").focus(),50); }
+$("parentBtn").onclick=()=>openGate(()=>{ renderParent(); show("parent"); });
+$("gateCancel").onclick=()=>$("gate").classList.remove("show");
+$("gateOk").onclick=()=>{ if(+$("gateIn").value===gateAns){ $("gate").classList.remove("show"); gateThen&&gateThen(); } else { $("gateIn").value=""; sfx.bad(); } };
+$("gateIn").addEventListener("keydown",e=>{ if(e.key==="Enter") $("gateOk").click(); });
+function renderParent(){
+  const played = S.playDay===today() ? Math.round(S.playMs/60000) : 0;
+  $("parentSummary").innerHTML=`${S.name}: ⭐ ${totalStars()}/${LEVELS.length*3} stars · Level ${Math.min(S.unlocked,LEVELS.length)}/${LEVELS.length} · ${rankName()} · played ${played} min today`;
+  let rows="<tr><th>Skill</th><th>✔</th><th>✘</th><th>Accuracy</th></tr>";
+  Object.keys(SKILL_NAMES).forEach(k=>{ const s=S.stats[k]; if(!s) return; const p=Math.round(100*s.r/(s.r+s.w));
+    rows+=`<tr><td>${SKILL_NAMES[k]}</td><td>${s.r}</td><td>${s.w}</td><td><div class="row" style="justify-content:flex-start"><div class="bar"><div style="width:${p}%;background:${p>=85?'#22b573':p>=65?'#ffbf1f':'#ff6b6b'}"></div></div>${p}%</div></td></tr>`; });
+  $("skillTable").innerHTML=Object.keys(S.stats).length?rows:"<tr><td>No games played yet.</td></tr>";
+  const m=Object.entries(S.missed).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).slice(0,15);
+  $("missedList").innerHTML=m.length?m.map(([k,v])=>`<span class="pill" style="display:inline-block;margin:4px">${k} <small>(${v})</small></span>`).join(""):"None yet — great!";
+  $("limitBtns").innerHTML=[0,15,20,30,45].map(v=>`<button class="small-btn" data-v="${v}" style="${S.limit===v?'background:#7c5cff;color:#fff':''}">${v?v+" min":"No limit"}</button>`).join("");
+  [...$("limitBtns").children].forEach(b=>b.onclick=()=>{ S.limit=+b.dataset.v; save(); renderParent(); });
+}
+$("exportBtn").onclick=()=>{ $("backupBox").value=btoa(unescape(encodeURIComponent(JSON.stringify(S)))); $("backupBox").select(); try{ document.execCommand("copy"); toast("Copied!","#22b573"); }catch(e){} };
+$("importBtn").onclick=()=>{ try{ const d=JSON.parse(decodeURIComponent(escape(atob($("backupBox").value.trim())))); if(!d||typeof d!=="object"||!("stars" in d)) throw 0; S=Object.assign(fresh(),d,{familyOk:true}); save(); toast("Restored!","#22b573"); renderParent(); }catch(e){ toast("That code didn't work","#ff6b6b"); } };
+$("unlockAll").onclick=()=>{ S.unlocked=LEVELS.length; save(); toast("Unlocked!","#7c5cff"); };
+$("renameBtn").onclick=()=>{ renderWelcome(); show("welcome"); };
+let resetArmed=false;
+$("resetBtn").onclick=()=>{
+  if(!resetArmed){ resetArmed=true; $("resetBtn").textContent="Tap again to erase everything"; setTimeout(()=>{resetArmed=false;$("resetBtn").textContent="Reset all progress";},4000); return; }
+  const keep={name:S.name,avatar:S.avatar,pet:S.pet,petName:S.petName,familyOk:true}; S=Object.assign(fresh(),keep); save(); resetArmed=false; $("resetBtn").textContent="Reset all progress"; renderParent(); toast("Reset","#ff6b6b");
+};
+
+/* ============ boot ============ */
+window.addEventListener("resize",()=>{ const k=window.innerWidth>900?3:window.innerWidth>520?2:1; if(k!==buildPad.w) buildPad(); });
+function boot(){
+  applyTheme(); buildPad();
+  if(!S.familyOk){ show("lock"); return; }
+  renderWelcome(); show(S.name && S.petName ? "map" : "welcome");
+}
+boot();
+if("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
