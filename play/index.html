@@ -93,7 +93,7 @@ h1{font-size:clamp(36px,7vw,58px);margin:6px 0} h2{font-size:clamp(22px,4vw,30px
 .buddy.jump{animation:jump .6s}
 @keyframes jump{40%{transform:translateY(-26px) rotate(12deg) scale(1.2)}}
 /* scratch pad */
-#scratch{position:absolute;inset:0;border-radius:28px;z-index:5;pointer-events:none;touch-action:none}
+#scratch{position:absolute;inset:0;width:100%;height:100%;border-radius:28px;z-index:5;pointer-events:none;touch-action:none}
 #scratch.on{pointer-events:auto;cursor:crosshair;box-shadow:inset 0 0 0 4px #ffd34d}
 .qcard.scr{min-height:min(78vh,640px);justify-content:flex-start}
 .scr-bar{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:6;display:none;gap:6px;background:#fff;border-radius:999px;padding:5px 8px;box-shadow:0 4px 14px rgba(43,35,80,.25)}
@@ -1260,6 +1260,7 @@ function scratchClear(){ const cv=$("scratch"); if(cv.width) scratchCtx().clearR
 function scratchOpen(on){ SCR.on=on; $("scratch").parentElement.classList.toggle("scr",on); if(on) setTimeout(scratchFit,30); $("scratch").classList.toggle("on",on); $("scrBar").classList.toggle("on",on); $("scratchBtn").style.background=on?"#ffd34d":"";
   if(on){ scratchFit(); if(G && !G.usedScratch){ G.usedScratch=true; S.ux.scratch++; } } }
 $("scratchBtn").onclick=()=>{ sfx.tap(); scratchOpen(!SCR.on); };
+window.addEventListener("resize",()=>{ if(SCR.on) scratchFit(); });
 [...$("scrBar").children].forEach(b=>b.onclick=()=>{ const c=b.dataset.c; sfx.tap();
   if(c==="clear"){ scratchClear(); return; } if(c==="close"){ scratchOpen(false); return; }
   [...$("scrBar").children].forEach(x=>x.classList.remove("sel")); b.classList.add("sel");
