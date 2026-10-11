@@ -46,7 +46,7 @@ h1{font-size:clamp(36px,7vw,58px);margin:6px 0} h2{font-size:clamp(22px,4vw,30px
 .hero-av{width:1.3em;height:1.3em;vertical-align:middle;display:inline-block}
 .pick button .hero-av{width:64px;height:64px}
 /* map */
-.pet-panel{display:flex;align-items:center;gap:14px;background:#fff;border-radius:26px;padding:10px 18px;box-shadow:var(--sh);margin-top:10px;max-width:1100px;width:100%}
+.pet-panel{flex-wrap:wrap;display:flex;align-items:center;gap:14px;background:#fff;border-radius:26px;padding:10px 18px;box-shadow:var(--sh);margin-top:10px;max-width:1100px;width:100%}
 .pet{font-size:64px;position:relative;display:inline-block;line-height:1}
 .pet .acc{position:absolute;font-size:30px;right:-12px;top:-10px}
 .pet.legend::after{content:"✨";position:absolute;left:-14px;bottom:-4px;font-size:28px;animation:bob 1.5s infinite}
@@ -93,6 +93,18 @@ h1{font-size:clamp(36px,7vw,58px);margin:6px 0} h2{font-size:clamp(22px,4vw,30px
 .buddy{position:absolute;top:6px;left:12px;font-size:44px;transition:transform .2s}
 .buddy.jump{animation:jump .6s}
 @keyframes jump{40%{transform:translateY(-26px) rotate(12deg) scale(1.2)}}
+/* scratch pad */
+#scratch{position:absolute;inset:0;border-radius:28px;z-index:5;pointer-events:none;touch-action:none}
+#scratch.on{pointer-events:auto;cursor:crosshair;box-shadow:inset 0 0 0 4px #ffd34d}
+.qcard.scr{min-height:min(78vh,640px);justify-content:flex-start}
+.scr-bar{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);z-index:6;display:none;gap:6px;background:#fff;border-radius:999px;padding:5px 8px;box-shadow:0 4px 14px rgba(43,35,80,.25)}
+.scr-bar.on{display:flex}
+.scr-bar button{width:40px;height:40px;border-radius:50%;font-size:20px;background:#f4f2fb}
+.scr-bar button.sel{outline:3px solid var(--purple)}
+.qtools button.glow{animation:pulse 1s infinite;background:#fff3c4}
+.col .carry.tap{border:2px dashed #cfc6ff;border-radius:8px;cursor:pointer;color:#ff4f6d}
+.col-tip{font-size:16px;font-weight:800;color:var(--soft);text-align:center}
+.ux td{font-size:15px}
 /* visuals */
 .visual{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;align-items:center;max-width:100%}
 .tf{display:grid;grid-template-columns:repeat(5,40px);gap:5px;padding:6px;background:#f1edff;border-radius:12px}
@@ -176,7 +188,7 @@ textarea{width:100%;height:80px;font-size:12px;border-radius:12px;border:2px sol
 <section class="screen" id="welcome">
   <div class="row" style="font-size:90px"><span class="bob">🦉</span><span id="welcomeHero" style="font-size:120px"></span></div>
   <h1>Math Quest</h1>
-  <div class="card" style="display:flex;flex-direction:column;align-items:center;gap:6px;max-width:640px">
+  <div class="card" style="display:flex;flex-direction:column;align-items:center;gap:6px;max-width:640px;width:100%">
     <h2>Hi! I'm Pip. What's your name?</h2>
     <input class="name-input" id="nameInput" maxlength="14" placeholder="Your name">
     <h2 style="font-size:22px;margin-top:8px">Pick your hero</h2>
@@ -185,6 +197,14 @@ textarea{width:100%;height:80px;font-size:12px;border-radius:12px;border:2px sol
     <div class="pick" id="petPick"></div>
     <input class="name-input" id="petName" maxlength="12" placeholder="Name your pet" style="font-size:22px">
     <button class="big-btn green" id="startBtn" style="margin-top:8px">Let's go! ▶</button>
+    <div style="margin-top:10px;border-top:2px dashed #e3ddff;padding-top:10px;text-align:center;width:100%">
+      <button class="small-btn" id="contBtn" style="white-space:normal;max-width:100%">🔄 Already playing on another device? Continue my progress</button>
+      <div id="contBox" style="display:none;margin-top:8px">
+        <input class="name-input" id="contCode" placeholder="Sync code" style="font-size:20px;text-transform:uppercase" autocomplete="off" autocapitalize="characters">
+        <div style="margin-top:8px"><button class="big-btn green" id="contGo">Load my progress</button></div>
+        <div id="contMsg" style="margin-top:6px;font-weight:700;color:var(--soft)">Find the code in 👪 Grown-ups → Sync on the other device.</div>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -241,7 +261,9 @@ textarea{width:100%;height:80px;font-size:12px;border-radius:12px;border:2px sol
   <div class="stage">
     <div class="card qcard">
       <div class="buddy" id="buddy"></div>
-      <div class="qtools"><button id="speakBtn" title="Read it to me">🔊</button></div>
+      <canvas id="scratch"></canvas>
+      <div class="scr-bar" id="scrBar"><button data-c="#7c5cff" class="sel">🟣</button><button data-c="#ff4f6d">🔴</button><button data-c="#22b573">🟢</button><button data-c="erase">🧽</button><button data-c="clear">🗑️</button><button data-c="close">✅</button></div>
+      <div class="qtools"><button id="hintBtn" title="Hint">💡</button><button id="scratchBtn" title="Scratch pad">✏️</button><button id="speakBtn" title="Read it to me">🔊</button></div>
       <div class="boss" id="bossBox" style="display:none"><div class="m" id="bossM">👾</div><div><div style="font-weight:800" id="bossName"></div><div class="hp"><div id="bossHp"></div></div></div></div>
       <div class="visual" id="visual"></div>
       <div class="qtext" id="qtext"></div>
@@ -331,6 +353,8 @@ textarea{width:100%;height:80px;font-size:12px;border-radius:12px;border:2px sol
     <div id="parentSummary" style="font-size:18px;font-weight:700"></div>
     <h3>Skills (first-try accuracy)</h3>
     <table id="skillTable"></table>
+    <h3>How it’s going (usability)</h3>
+    <div id="uxBox"></div>
     <h3>Facts to practice most</h3>
     <div id="missedList" style="font-size:18px"></div>
     <h3>Daily play limit</h3>
@@ -377,7 +401,7 @@ var syncTok=null, syncTimer=null, syncBusy=false;
 /* ============ save data ============ */
 const KEY = "mathquest.v2";
 const fresh = () => ({name:"", avatar:"hero:girl", outfit:"cruise", pet:"dragon", petName:"", acc:"", theme:"", owned:[], stars:{}, unlocked:1, coins:0, xp:0,
-  stickers:[], stats:{}, missed:{}, sound:true, music:true, chest:"", seenLesson:{}, familyOk:false, limit:0, playDay:"", playMs:0, history:{}, lastStage:0, pro:false});
+  stickers:[], stats:{}, missed:{}, sound:true, music:true, chest:"", seenLesson:{}, familyOk:false, limit:0, playDay:"", playMs:0, history:{}, ux:{q:{},quits:{},scratch:0,hint:0,stuck:0}, lastStage:0, pro:false});
 let S;
 try { S = Object.assign(fresh(), JSON.parse(localStorage.getItem(KEY) || "{}")); } catch(e){ S = fresh(); }
 function fixUnlocked(){ const done=Object.keys(S.stars||{}).map(Number).filter(i=>S.stars[i]>0); if(done.length) S.unlocked=Math.max(S.unlocked||1, Math.min(LEVELS.length, Math.max(...done)+2)); }
@@ -635,7 +659,9 @@ function renderColumn(q, input, showCarry){
   let h=`<div class="col" style="grid-template-columns:repeat(${w+1},auto)">`;
   // carry row
   h+=`<div class="cell carry"></div>`;
-  for(let i=0;i<w;i++) h+=`<div class="cell carry">${showCarry && c.carry && c.carry[i]?c.carry[i]:""}</div>`;
+  const um = (G && G.q===q && G.marks) ? G.marks : null;
+  for(let i=0;i<w;i++){ const off = showCarry && c.carry && c.carry[i]; const mine = um && um[i];
+    h+=`<div class="cell carry ${um&&!c.hide?'tap':''}" ${um&&!c.hide?`data-ci="${i}"`:''}>${off?c.carry[i]:mine||""}</div>`; }
   const cellFor=(row,arr,i)=>{
     if(c.hide && c.hide.row===row && c.hide.i===i) return `<div class="cell miss">${input||"?"}</div>`;
     return `<div class="cell">${arr[i]===" "?"":arr[i]}</div>`;
@@ -1047,6 +1073,15 @@ function renderWelcome(){
   $("petPick").innerHTML=keys.map(k=>`<button class="${k===S.pet?'sel':''}" title="${PETS[k].label}">${PETS[k].stages[3]}</button>`).join("");
   [...$("petPick").children].forEach((b,i)=>b.onclick=()=>{ S.pet=keys[i]; sfx.tap(); renderWelcome(); });
 }
+$("contBtn").onclick=()=>{ $("contBox").style.display=""; $("contCode").focus(); };
+$("contGo").onclick=async()=>{
+  const v=$("contCode").value.trim().toUpperCase().replace(/\s+/g,"");
+  if(!/^[A-Z0-9-]{20,40}$/.test(v)){ $("contMsg").textContent="Hmm, that code doesn't look right. It looks like ABCDE-FGHJK-LMNPQ-RSTUV."; sfx.bad(); return; }
+  S.syncKey=v; S.syncJoined=false; S.familyOk=true; save(); $("contMsg").textContent="Loading… ☁️";
+  await syncNow();
+  if(S.name && S.petName){ toast("Welcome back!","#22b573"); applyTheme(); show("map"); }
+  else $("contMsg").textContent="Couldn't find progress for that code. Check the code and your internet.";
+};
 $("startBtn").onclick=()=>{
   const n=$("nameInput").value.trim(); if(!n){ $("nameInput").focus(); $("nameInput").style.borderColor="#ff6b6b"; return; }
   S.name=n.charAt(0).toUpperCase()+n.slice(1); S.petName=($("petName").value.trim()||"Sparky"); save(); sfx.win(); say(`Welcome ${S.name}! Let's go on a math quest!`); show("map");
@@ -1193,7 +1228,10 @@ function renderProgress(){
 }
 function nextQuestion(){
   if(G.i>=G.qs.length) return finishLevel();
-  const q=G.qs[G.i]; G.q=q; G.attempts=0; G.input=""; G.locked=false;
+  const q=G.qs[G.i]; G.q=q; G.attempts=0; G.input=""; G.locked=false; G.qt0=Date.now(); G.showCarry=false; G.usedHint=false; G.usedScratch=false;
+  G.marks = q.col ? Array(Math.max(String(q.col.top).length,String(q.col.bot).length,String(q.col.res).length)).fill("") : null;
+  scratchClear(); scratchOpen(false); $("hintBtn").classList.remove("glow"); clearTimeout(G.idleT);
+  G.idleT=setTimeout(()=>{ if(G && G.q===q && !G.input && !G.locked){ $("hintBtn").classList.add("glow"); S.ux.stuck++; } },25000);
   $("visual").innerHTML = q.col ? renderColumn(q,"") : (q.visual||"");
   $("qtext").textContent=q.text; $("qtext").className="qtext"+(q.word?" word":""); $("qtext").style.display=q.text?"":"none";
   $("hint").className="hint"; $("hint").innerHTML=""; $("gotItBtn").style.display="none";
@@ -1202,7 +1240,7 @@ function nextQuestion(){
     [...$("answerArea").querySelectorAll(".choice")].forEach(b=>b.onclick=()=>submit(b.textContent));
     $("pad").style.display="none";
   } else {
-    $("answerArea").innerHTML = q.col ? "" : `<div class="answer-box" id="ans">&nbsp;</div>`;
+    $("answerArea").innerHTML = q.col ? (q.col.hide ? "" : `<div class="col-tip">Ones first ⬅️ · tap ⬚ to carry · ✏️ scratch pad</div>`) : `<div class="answer-box" id="ans">&nbsp;</div>`;
     $("pad").style.display="";
   }
   renderProgress();
@@ -1210,7 +1248,7 @@ function nextQuestion(){
 }
 function updateAns(){
   const q=G.q;
-  if(q.col){ $("visual").innerHTML=renderColumn(q,G.input,G.attempts>0); return; }
+  if(q.col){ $("visual").innerHTML=renderColumn(q,G.input,G.attempts>0||G.showCarry); return; }
   const a=$("ans"); if(a){ a.textContent=G.input||"\u00a0"; a.classList.remove("bad-shake","ok-glow"); }
 }
 function buildPad(){
@@ -1225,9 +1263,11 @@ function buildPad(){
 function press(k){
   if(!G||!G.q||G.q.choices||G.locked||$("gotItBtn").style.display!=="none") return;
   const max = G.q.col ? (G.q.col.hide?1:String(G.q.col.res).length) : 4;
-  if(k==="⌫"){ G.input=G.input.slice(0,-1); sfx.tap(); }
-  else if(k==="✓"){ if(G.input!=="") submit(G.input); return; }
-  else if(G.input.length<max){ G.input = (G.input==="0" ? "" : G.input) + k; sfx.tap(); }
+  const rtl = G.q.col && !G.q.col.hide;   // column answers are written right-to-left, ones first, like on paper
+  if(k==="⌫"){ G.input = rtl ? G.input.slice(1) : G.input.slice(0,-1); sfx.tap(); }
+  else if(k==="✓"){ if(G.input!=="") submit(rtl ? String(+G.input) : G.input); return; }
+  else if(G.input.length<max){ G.input = rtl ? k + G.input : (G.input==="0" ? "" : G.input) + k; sfx.tap(); }
+  clearTimeout(G.idleT); $("hintBtn").classList.remove("glow");
   updateAns();
 }
 document.addEventListener("keydown",e=>{
@@ -1254,6 +1294,8 @@ function submit(val){
   if(ok){
     G.locked=true; const first=G.attempts===1;
     if(G.results[G.i]===undefined) G.results[G.i]=first;
+    uxLog(q, true);
+    G.missRun=0;
     if(first){ logAnswer(true); G.firstTry++; G.streak++; G.best=Math.max(G.best,G.streak); stat(q.gen,true); if(S.missed[q.key]) S.missed[q.key]--; }
     else G.streak=0;
     const earn = first ? (G.streak>=5?3:G.streak>=3?2:1) : 1; S.coins+=earn; G.earned+=earn;
@@ -1269,10 +1311,12 @@ function submit(val){
     sfx.bad(); G.streak=0;
     if(box){ box.classList.remove("bad-shake"); void box.offsetWidth; box.classList.add("bad-shake"); }
     if(G.attempts===1){
+      uxLog(q, false); G.missRun=(G.missRun||0)+1;
+      if(G.missRun>=3){ G.missRun=0; toast("Deep breath 🦉","#7c5cff"); setTimeout(()=>say("That's a tricky one. Let's slow down. Use the scratch pad, or tap the light bulb for a hint."),900); if(q.col) setTimeout(()=>scratchOpen(true),1200); }
       logAnswer(false); stat(q.gen,false); S.missed[q.key]=(S.missed[q.key]||0)+1; save(); G.results[G.i]=false;
       $("hint").innerHTML=`🦉 ${q.hint||"Try again!"}`+(q.hintVis?`<div class="hv">${q.hintVis}</div>`:"");
       $("hint").className="hint show"; if(q.hint) say("Here's a hint. "+q.hint);
-      setTimeout(()=>{ G.input=""; updateAns(); },500);
+      setTimeout(()=>{ G.input=""; if(G.marks) G.marks.fill(""); updateAns(); },500);
     } else {
       const ansText = q.col && q.col.hide ? `The lost digit is <b>${q.answer}</b>.` : `The answer is <b>${q.answer}</b>.`;
       $("hint").innerHTML=`🦉 ${ansText} ${q.explain||""}`+(q.hintVis?`<div class="hv">${q.hintVis}</div>`:"");
@@ -1286,9 +1330,56 @@ function submit(val){
 }
 $("gotItBtn").onclick=()=>{ G.i++; nextQuestion(); };
 $("speakBtn").onclick=()=>G&&G.q&&say(G.q.text||"Solve the column problem");
-$("quitBtn").onclick=()=>{ if(window.speechSynthesis) speechSynthesis.cancel(); if(G){ trackPlay(Date.now()-G.t0); save(); } show("map"); };
+$("quitBtn").onclick=()=>{ if(window.speechSynthesis) speechSynthesis.cancel(); if(G){ clearTimeout(G.idleT); scratchOpen(false); if(G.li>=0 && G.i<G.qs.length){ S.ux.quits[G.li]=(S.ux.quits[G.li]||0)+1; } trackPlay(Date.now()-G.t0); save(); } show("map"); };
+
+/* ---- usability tracking (stays on the device + her cloud save; shown in Grown-ups corner) ---- */
+function uxLog(q, ok){
+  const u=S.ux.q[q.gen]=S.ux.q[q.gen]||{n:0,ms:0,w:0,hint:0,scr:0};
+  if(ok){ u.n++; u.ms+=Math.min(120000, Date.now()-(G.qt0||Date.now())); if(G.usedHint) u.hint++; if(G.usedScratch) u.scr++; }
+  else u.w++;
+}
+/* ---- hint on demand ---- */
+$("hintBtn").onclick=()=>{
+  if(!G||!G.q||G.locked) return; const q=G.q;
+  $("hint").innerHTML=`🦉 ${q.hint||"Read it slowly. You can do it!"}`+(q.hintVis?`<div class="hv">${q.hintVis}</div>`:"");
+  $("hint").className="hint show"; if(q.hint) say(q.hint);
+  if(!G.usedHint){ G.usedHint=true; S.ux.hint++; } $("hintBtn").classList.remove("glow");
+  if(q.col) showCarryHelp();
+};
+function showCarryHelp(){ G.showCarry=true; if(G.q.col && !G.q.col.hide){ $("visual").innerHTML=renderColumn(G.q,G.input,true); } }
+/* ---- carry boxes on column problems ---- */
+$("visual").addEventListener("click",e=>{
+  const c=e.target.closest(".carry[data-ci]"); if(!c||!G||!G.marks||G.locked) return;
+  const i=+c.dataset.ci, cycle = G.q.col.op==="+" ? ["","1"] : ["","10"];
+  G.marks[i]=cycle[(cycle.indexOf(G.marks[i])+1)%cycle.length]; sfx.tap(); updateAns();
+});
+/* ---- scratch pad ---- */
+const SCR={on:false,color:"#7c5cff",erase:false,draw:false,last:null};
+function scratchCtx(){ return $("scratch").getContext("2d"); }
+function scratchFit(){ const cv=$("scratch"), card=cv.parentElement, r=window.devicePixelRatio||1;
+  const w=card.clientWidth, h=card.clientHeight; if(cv.width!==Math.round(w*r)||cv.height!==Math.round(h*r)){ const old=cv.width?cv.toDataURL():null;
+    cv.width=Math.round(w*r); cv.height=Math.round(h*r); const x=scratchCtx(); x.setTransform(r,0,0,r,0,0);
+    if(old){ const im=new Image(); im.onload=()=>x.drawImage(im,0,0,w,h); im.src=old; } } }
+function scratchClear(){ const cv=$("scratch"); if(cv.width) scratchCtx().clearRect(0,0,cv.width,cv.height); }
+function scratchOpen(on){ SCR.on=on; $("scratch").parentElement.classList.toggle("scr",on); if(on) setTimeout(scratchFit,30); $("scratch").classList.toggle("on",on); $("scrBar").classList.toggle("on",on); $("scratchBtn").style.background=on?"#ffd34d":"";
+  if(on){ scratchFit(); if(G && !G.usedScratch){ G.usedScratch=true; S.ux.scratch++; } } }
+$("scratchBtn").onclick=()=>{ sfx.tap(); scratchOpen(!SCR.on); };
+[...$("scrBar").children].forEach(b=>b.onclick=()=>{ const c=b.dataset.c; sfx.tap();
+  if(c==="clear"){ scratchClear(); return; } if(c==="close"){ scratchOpen(false); return; }
+  [...$("scrBar").children].forEach(x=>x.classList.remove("sel")); b.classList.add("sel");
+  SCR.erase = c==="erase"; if(!SCR.erase) SCR.color=c; });
+(function(){
+  const cv=$("scratch"); const pt=e=>{ const r=cv.getBoundingClientRect(); return [e.clientX-r.left, e.clientY-r.top]; };
+  cv.addEventListener("pointerdown",e=>{ if(!SCR.on) return; e.preventDefault(); cv.setPointerCapture(e.pointerId); SCR.draw=true; SCR.last=pt(e); });
+  cv.addEventListener("pointermove",e=>{ if(!SCR.draw) return; e.preventDefault(); const p=pt(e), x=scratchCtx();
+    x.globalCompositeOperation = SCR.erase ? "destination-out" : "source-over";
+    x.strokeStyle=SCR.color; x.lineWidth = SCR.erase ? 26 : 5; x.lineCap="round"; x.lineJoin="round";
+    x.beginPath(); x.moveTo(...SCR.last); x.lineTo(...p); x.stroke(); SCR.last=p; });
+  const end=()=>{ SCR.draw=false; }; cv.addEventListener("pointerup",end); cv.addEventListener("pointercancel",end); cv.addEventListener("pointerleave",end);
+})();
 
 function finishLevel(){
+  clearTimeout(G.idleT); scratchOpen(false);
   trackPlay(Date.now()-G.t0);
   if(G.skip){
     const pass=G.firstTry>=5; G.resultInfo={stars:pass?3:0,isBoss:false,final:false};
@@ -1349,7 +1440,21 @@ $("parentBtn").onclick=()=>openGate(()=>{ renderParent(); show("parent"); });
 $("gateCancel").onclick=()=>$("gate").classList.remove("show");
 $("gateOk").onclick=()=>{ if(+$("gateIn").value===gateAns){ $("gate").classList.remove("show"); gateThen&&gateThen(); } else { $("gateIn").value=""; sfx.bad(); } };
 $("gateIn").addEventListener("keydown",e=>{ if(e.key==="Enter") $("gateOk").click(); });
+function renderUX(){
+  const u=S.ux||{q:{},quits:{}}; let rows="<table class='ux'><tr><th>Skill</th><th>Avg time</th><th>Hints</th><th>Scratch</th><th>Misses</th></tr>"; const tips=[];
+  Object.entries(u.q).forEach(([g,v])=>{ if(!SKILL_NAMES[g]) return; const avg=v.n?Math.round(v.ms/v.n/1000):0;
+    rows+=`<tr><td>${SKILL_NAMES[g]}</td><td>${avg}s</td><td>${v.hint}</td><td>${v.scr}</td><td>${v.w}</td></tr>`;
+    if(v.n>=4 && avg>35) tips.push(`<b>${SKILL_NAMES[g]}</b> is slow going (${avg}s per question). A short warm-up with Power-up practice may help.`);
+    if(v.w>=4 && v.w>v.n) tips.push(`<b>${SKILL_NAMES[g]}</b> has more misses than right answers. Try replaying the level before it.`); });
+  const q=Object.entries(u.quits||{}).filter(([,n])=>n>=2).map(([li,n])=>`${LEVELS[li]?LEVELS[li].name:li} (${n}×)`);
+  if(q.length) tips.push(`Left part-way through: ${q.join(", ")}. These may feel too hard or too long.`);
+  if((u.stuck||0)>=5) tips.push(`She often pauses without answering (${u.stuck} times). The 💡 hint button glows to help.`);
+  $("uxBox").innerHTML = (Object.keys(u.q).length? rows+"</table>" : "No data yet.") +
+    (tips.length? `<div style="margin-top:8px;background:#fff7d6;border-radius:14px;padding:10px;font-size:16px">🦉 ${tips.join("<br>🦉 ")}</div>` : "") +
+    `<div style="font-size:14px;color:var(--soft);margin-top:4px">Scratch pad opened ${u.scratch||0}× · hints asked ${u.hint||0}×</div>`;
+}
 function renderParent(){
+  renderUX();
   renderSync();
   const played = S.playDay===today() ? Math.round(S.playMs/60000) : 0;
   $("parentSummary").innerHTML=`${S.name}: ⭐ ${totalStars()}/${LEVELS.length*3} stars · Level ${Math.min(S.unlocked,LEVELS.length)}/${LEVELS.length} · ${rankName()} · played ${played} min today`;
