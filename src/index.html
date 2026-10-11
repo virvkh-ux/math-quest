@@ -380,6 +380,7 @@ const fresh = () => ({name:"", avatar:"hero:girl", outfit:"cruise", pet:"dragon"
   stickers:[], stats:{}, missed:{}, sound:true, music:true, chest:"", seenLesson:{}, familyOk:false, limit:0, playDay:"", playMs:0, history:{}, lastStage:0, pro:false});
 let S;
 try { S = Object.assign(fresh(), JSON.parse(localStorage.getItem(KEY) || "{}")); } catch(e){ S = fresh(); }
+function fixUnlocked(){ const done=Object.keys(S.stars||{}).map(Number).filter(i=>S.stars[i]>0); if(done.length) S.unlocked=Math.max(S.unlocked||1, Math.min(LEVELS.length, Math.max(...done)+2)); }
 const save = () => { S.updatedAt = Date.now(); try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} if(typeof syncSoon==="function") syncSoon(); };
 // URL helpers: ?code=XXXX unlocks, ?name=NAME prefills
 const params = new URLSearchParams(location.search);
@@ -805,7 +806,7 @@ const LEVELS = [
   {w:3,name:"Story problems",e:"📖",gen:["words"]},{w:3,name:"Boss!",e:"👽",gen:["xEq","balance","chains","parens","money"],boss:true},
   {w:4,name:"Skip counting",e:"🐸",gen:["skip"]},{w:4,name:"Cookie plates",e:"🍪",gen:["plates"]},{w:4,name:"Crossing lines",e:"✳️",gen:["cross"]},
   {w:4,name:"Area & arrays",e:"🔲",gen:["area"]},{w:4,name:"× 0, 1, 2, 10",e:"✖️",gen:["times1"]},{w:4,name:"× 3, 4, 5",e:"🎯",gen:["times2"]},
-  {w:4,name:"Missing factor",e:"❓",gen:["missFactor"]},{w:4,name:"FINAL BOSS!",e:"👾",gen:["plates","cross","times1","times2","missFactor"],boss:true}
+  {w:4,name:"Missing factor",e:"❓",gen:["missFactor"]},{w:4,name:"Boss!",e:"👾",gen:["plates","cross","times1","times2","missFactor"],boss:true}
 ];
 const SKILL_NAMES = {bonds10:"Number bonds to 10",add10:"Adding within 10",sub10:"Subtracting within 10",make10:"Make-a-10",add20:"Adding within 20",sub20:"Subtracting within 20",
   family:"Fact families",compare:"Comparing (< > =)",martian:"Place value (Martian numbers)",mental:"Mental math with tens",colAdd:"Column addition",colCarry:"Column addition with carrying",
@@ -844,6 +845,176 @@ const LESSONS = {
   times2:{t:"× 3, 4, 5",v:()=>'<span style="font-size:32px;font-weight:900">5, 10, 15, 20, 25…</span>',x:"Count by 5s like a clock! For × 3 and × 4, skip count too: 4, 8, 12, 16…"},
   missFactor:{t:"Missing factor",v:()=>groupsVisual(4,5,"●"),x:"4 × ? = 20. How many hops of 4 make 20? 4, 8, 12, 16, 20 — five hops! ? = 5."}
 };
+/* ===== Grade 2 (RSM Grade 2 Advanced) generators ===== */
+function balanceWide(left,right){
+  return `<svg width="360" height="161" style="max-width:100%;height:auto" viewBox="0 0 380 170"><polygon points="190,60 170,160 210,160" fill="#9a8cff"/><rect x="20" y="52" width="340" height="8" rx="4" fill="#7c5cff"/>
+  <line x1="80" y1="60" x2="80" y2="96" stroke="#7c5cff" stroke-width="3"/><line x1="300" y1="60" x2="300" y2="96" stroke="#7c5cff" stroke-width="3"/>
+  <rect x="4" y="96" width="152" height="46" rx="12" fill="#fff3c4" stroke="#e0b100" stroke-width="3"/><text x="80" y="127" text-anchor="middle" font-size="21" font-weight="900" fill="#2b2350">${left}</text>
+  <rect x="224" y="96" width="152" height="46" rx="12" fill="#d9f3ff" stroke="#3fa9ff" stroke-width="3"/><text x="300" y="127" text-anchor="middle" font-size="21" font-weight="900" fill="#2b2350">${right}</text></svg>`;
+}
+function rectVisual(w,h,lw,lh){
+  const s=Math.min(26, Math.floor(220/Math.max(w,h))), W=w*s, H=h*s;
+  return `<svg width="${W+80}" height="${H+60}" viewBox="0 0 ${W+80} ${H+60}"><rect x="40" y="20" width="${W}" height="${H}" fill="#ffe3a3" stroke="#7c5cff" stroke-width="4"/>
+  <text x="${40+W/2}" y="14" text-anchor="middle" font-size="18" font-weight="900" fill="#2b2350">${lw}</text><text x="30" y="${24+H/2}" text-anchor="end" font-size="18" font-weight="900" fill="#2b2350">${lh}</text></svg>`;
+}
+function machineVisual(pairs){
+  return `<div style="background:#eef6ff;border-radius:18px;padding:10px 18px;font-size:30px;font-weight:900;line-height:1.5;text-align:center">🤖<br>${pairs.map(([a,b])=>`${a} ➜ ${b}`).join("<br>")}</div>`;
+}
+const BIGS = [["the largest one-digit number",9],["the smallest two-digit number",10],["the largest two-digit number",99],["the smallest three-digit number",100],
+  ["the largest three-digit number",999],["the smallest two-digit odd number",11],["the largest two-digit even number",98],["the smallest three-digit odd number",101],["the smallest two-digit even number",10],["the largest two-digit odd number",99]];
+const roundN=(n,to)=>Math.floor((n+to/2)/to)*to;
+Object.assign(GEN, {
+  guessRule(){
+    const t=ri(0,4), k=ri(3,15);
+    const R = [ {f:x=>x+k, h:`Each output is ${k} more than the input.`, lo:1, hi:40},
+                {f:x=>x-k, h:`Each output is ${k} less than the input.`, lo:k+1, hi:k+40},
+                {f:x=>2*x, h:"The robot doubles each number: add it to itself!", lo:2, hi:25},
+                {f:x=>2*x+3, h:"Double the number, then add 3.", lo:1, hi:15},
+                {f:x=>x+10, h:"Each output is 10 more: the tens digit goes up by 1.", lo:3, hi:85} ][t];
+    const xs=new Set(); while(xs.size<4) xs.add(ri(R.lo,R.hi)); const [a,b,c,d]=[...xs];
+    const back = Math.random()<.3 && t!==3;
+    const pairs=[[a,R.f(a)],[b,R.f(b)],[c,R.f(c)], back?["?",R.f(d)]:[d,"?"]];
+    return {text:"Guess my rule! What goes in the ?", answer: back?d:R.f(d), key:"rule"+t, visual:machineVisual(pairs),
+      hint: R.h + (back?" Now work backwards to find the input.":""), explain:`${d} ➜ ${R.f(d)}`};
+  },
+  smart(){
+    const t=ri(0,3);
+    if(t===0){ const a=ri(25,90), b=ri(12,49); return {text:`${a} + ${b} − ${b} = ?`, answer:a, key:"smartCancel", hint:`Add ${b}, then take ${b} away… they cancel out!`, explain:`${a} + ${b} − ${b} = ${a}`}; }
+    if(t===1){ const tt=ri(3,9), o=ri(1,9), a=tt*10+o, c=10-o, b=ri(11,Math.min(49,a+c-5)); return {text:`${a} − ${b} + ${c} = ?`, answer:a-b+c, key:"smartRound",
+      hint:`Easiest way: ${a} + ${c} = ${a+c} (a round number!). Then ${a+c} − ${b}.`, explain:`${a+c} − ${b} = ${a-b+c}`}; }
+    if(t===2){ const p=ri(11,39), q=10*ri(3,7)-p, r=ri(11,39), s=10*ri(3,7)-r; const nums=shuffle([p,q,r,s]);
+      return {text:`${nums.join(" + ")} = ?`, answer:p+q+r+s, key:"smartPairs", hint:`Find pairs that make round tens: ${p} + ${q} = ${p+q} and ${r} + ${s} = ${r+s}.`, explain:`${p+q} + ${r+s} = ${p+q+r+s}`}; }
+    const a=ri(30,80), c=ri(20,40), b=c+10*ri(1,3); return {text:`${a} + ${b} − ${c} = ?`, answer:a+b-c, key:"smartDiff", hint:`Easiest way: ${b} − ${c} = ${b-c} first. Then ${a} + ${b-c}.`, explain:`${a} + ${b-c} = ${a+b-c}`};
+  },
+  place3(){
+    const t=ri(0,4), h=ri(1,9), te=ri(0,9), o=ri(0,9), n=h*100+te*10+o;
+    if(t===0) return {text:`${n} = ${h*100} + ? + ${o}`, answer:te*10, key:"expand", hint:`${n} has ${h} hundreds, ${te} tens and ${o} ones. ${te} tens = ${te*10}.`, explain:`${n} = ${h*100} + ${te*10} + ${o}`};
+    if(t===1) return {text:`? = ${h*100} + ${te*10} + ${o}`, answer:n, key:"expand", hint:"Put the hundreds, tens and ones digits together.", explain:`${h*100} + ${te*10} + ${o} = ${n}`};
+    if(t===2){ const ones=ri(10,49); return {text:`${h} hundreds and ${ones} ones = ?`, answer:h*100+ones, key:"unitsMix", hint:`${h} hundreds = ${h*100}. Then add ${ones}.`, explain:`${h*100} + ${ones} = ${h*100+ones}`}; }
+    if(t===3){ const tens=ri(11,49); return {text:`${tens} tens = ?`, answer:tens*10, key:"tensCount", hint:`Each ten is 10. ${tens} tens = ${tens} × 10. Just add a 0!`, explain:`${tens} tens = ${tens*10}`}; }
+    const tens=ri(11,29), ones=ri(1,9); return {text:`${tens} tens and ${ones} ones = ?`, answer:tens*10+ones, key:"tensCount", hint:`${tens} tens = ${tens*10}. Then add ${ones} ones.`, explain:`${tens*10} + ${ones} = ${tens*10+ones}`};
+  },
+  riddle(){
+    const t=ri(0,3);
+    if(t===0){ const T=ri(1,7), k=ri(1,9-T); return {word:true, text:`I am a two-digit number. My tens digit is ${T}. My ones digit is ${k} more than my tens digit. What number am I?`, answer:T*10+T+k, key:"riddle", hint:`Tens = ${T}. Ones = ${T} + ${k} = ${T+k}.`, explain:`${T*10+T+k}`}; }
+    if(t===1){ const T=ri(3,9), k=ri(1,T); return {word:true, text:`I am a two-digit number. My tens digit is ${T}. My ones digit is ${k} less than my tens digit. What number am I?`, answer:T*10+T-k, key:"riddle", hint:`Ones = ${T} − ${k} = ${T-k}.`, explain:`${T*10+T-k}`}; }
+    if(t===2){ const T=ri(2,8), k=ri(1,9-T); const o=T+k; return {word:true, text:`A spy's secret code has ${T} tens and ${o-T} more ones than tens. What is the code?`, answer:T*10+o, key:"riddle", hint:`Ones = ${T} + ${o-T} = ${o}. Code = ${T} tens and ${o} ones.`, explain:`${T*10+o}`}; }
+    const H=ri(1,8), Te=ri(0,9), O=ri(0,9); return {word:true, text:`I am a three-digit number. My hundreds digit is ${H}. My tens digit is ${Te}. My ones digit is ${O}. What number am I?`, answer:H*100+Te*10+O, key:"riddle3", hint:"Write the digits in order: hundreds, tens, ones.", explain:`${H*100+Te*10+O}`};
+  },
+  oddEven(){
+    const n=ri(2,3), nums=[...Array(n)].map(()=>ri(11,899)), s=nums.reduce((a,b)=>a+b,0), ans=s%2?"Odd":"Even";
+    return {text:`Odd or even?\n${nums.join(" + ")}`, answer:ans, choices:["Odd","Even"], key:"parity",
+      hint:"Only the LAST digits matter! odd + odd = even, odd + even = odd, even + even = even.", explain:`Last digits: ${nums.map(x=>x%10).join(" + ")} → ${ans.toLowerCase()}`};
+  },
+  bigSmall(){
+    let A,B; do{ A=pick(BIGS); B=pick(BIGS); }while(A[1]===B[1]);
+    if(Math.random()<.5) return {word:true, text:`Find the sum of ${A[0]} and ${B[0]}.`, answer:A[1]+B[1], key:"bigSmallSum", hint:`${A[0]} is ${A[1]}. ${B[0]} is ${B[1]}. Now add!`, explain:`${A[1]} + ${B[1]} = ${A[1]+B[1]}`};
+    const [L,S]=A[1]>B[1]?[A,B]:[B,A];
+    return {word:true, text:`Find the difference between ${L[0]} and ${S[0]}.`, answer:L[1]-S[1], key:"bigSmallDiff", hint:`${L[0]} is ${L[1]}. ${S[0]} is ${S[1]}. Difference = bigger − smaller.`, explain:`${L[1]} − ${S[1]} = ${L[1]-S[1]}`};
+  },
+  col3Add(){ let a,b; do{ a=ri(101,749); b=ri(Math.random()<.4?11:101, 999-a); }while((a%10)+(b%10)<10 && Math.random()<.6); return colQ(a,b,"+"); },
+  col3Sub(){ const t=ri(0,2); let a,b;
+    if(t===0){ a=100*ri(2,9)+ri(0,9); b=ri(11,99); }              // borrow across a zero, e.g. 801 − 45
+    else if(t===1){ a=ri(300,999); b=ri(100,a-50); }
+    else { a=10*ri(20,99); b=ri(101,a-20); }
+    return colQ(a,b,"−"); },
+  rounding(){
+    const to=pick([10,10,100]), n= to===10 ? ri(11,989) : ri(101,989), r=roundN(n,to);
+    return {text:`Round ${n} to the nearest ${to===10?"ten":"hundred"}.`, answer:r, key:"round"+to,
+      hint: to===10 ? `${n} is between ${Math.floor(n/10)*10} and ${Math.floor(n/10)*10+10}. Look at the ones digit: 5 or more rounds UP.` : `${n} is between ${Math.floor(n/100)*100} and ${Math.floor(n/100)*100+100}. Look at the tens digit: 5 or more rounds UP.`,
+      hintVis:numberLineRange(Math.floor(n/to)*to, Math.floor(n/to)*to+to, n), explain:`${n} → ${r}`};
+  },
+  thinkNum(){
+    const t=ri(0,3);
+    if(t===0){ const x=ri(10,85), k=ri(5,15); return {word:true, text:`I thought of a number. I added ${k} and got ${x+k}. What is my number?`, answer:x, key:"think", hint:`Go backwards! Undo "+${k}" by taking away ${k}: ${x+k} − ${k}.`, explain:`${x+k} − ${k} = ${x}`}; }
+    if(t===1){ const x=ri(20,90), k=ri(5,19); return {word:true, text:`I thought of a number. I subtracted ${k} and got ${x-k}. What is my number?`, answer:x, key:"think", hint:`Go backwards! Undo "−${k}" by adding ${k}: ${x-k} + ${k}.`, explain:`${x-k} + ${k} = ${x}`}; }
+    if(t===2){ const x=ri(5,50); return {word:true, text:`I thought of a number. I doubled it and got ${2*x}. What is my number?`, answer:x, key:"thinkDouble", hint:`Doubling means X + X. Which number plus itself is ${2*x}? Take half of ${2*x}.`, explain:`${x} + ${x} = ${2*x}`}; }
+    const x=ri(30,90), a=ri(3,15), b=ri(5,20), r=x+a-b; return {word:true, text:`I thought of a number. I added ${a}, then subtracted ${b} and got ${r}. What is my number?`, answer:x, key:"think2", hint:`Go backwards step by step: ${r} + ${b} = ${r+b}, then ${r+b} − ${a} = ${r+b-a}.`, explain:`${x} + ${a} − ${b} = ${r}`};
+  },
+  compareSmart(){
+    const t=ri(0,3), sign=(l,r)=>l>r?">":l<r?"<":"="; let L,R,txt,h;
+    if(t===0){ const a=ri(30,80), b=ri(15,40), da=pick([1,2,-1,-2,0]), db=pick([1,-1,2,-2]); L=a+b; R=(a+da)+(b+db); txt=`${a} + ${b}  ⬜  ${a+da} + ${b+db}`; h="Compare part by part: which numbers got bigger, which got smaller, and by how much?"; }
+    else if(t===1){ const a=ri(50,190), b=ri(11,40), c=b+pick([1,-1,2]); L=a-b; R=a-c; txt=`${a} − ${b}  ⬜  ${a} − ${c}`; h="Taking away MORE leaves LESS!"; }
+    else if(t===2){ const a=ri(150,199), b=ri(110,a-5), d=pick([0,0,1,-1]), b2=b-100-d; L=a-b; R=(a-100)-b2; txt=`${a} − ${b}  ⬜  ${a-100} − ${b2}`; h="Both numbers lost 100… does the difference change?"; }
+    else { const x=ri(101,699), n=ri(3,5), d=pick([0,0,1,-1]); L=n*x; R=n*x+d; txt=`${n} × ${x}  ⬜  ${Array(n-1).fill(x).join(" + ")} + ${x+d}`; h=`${n} × ${x} means ${x} added ${n} times. Compare the last number!`; }
+    const ans=sign(L,R); return {text:txt, answer:ans, choices:["<","=",">"], key:"cmpSmart", hint:h, explain:`${L} ${ans} ${R}`};
+  },
+  bagEq(){
+    const w1=ri(2,30), w2=ri(2,30), x=ri(3,40), r1=ri(5,x+w1+w2-3), r2=x+w1+w2-r1;
+    return {text:"The scale is balanced. How heavy is the bag X?", answer:x, key:"bagEq", visual:balanceWide(`${w1} + X + ${w2}`, `${r1} + ${r2}`),
+      hint:`Right side: ${r1} + ${r2} = ${r1+r2}. Left side without X: ${w1} + ${w2} = ${w1+w2}. X = ${r1+r2} − ${w1+w2}.`, explain:`${w1} + X + ${w2} = ${r1+r2} → X = ${x}`};
+  },
+  perimeter(){
+    const t=ri(0,2);
+    if(t===0){ const w=ri(2,9), h=ri(2,7); return {text:"What is the perimeter of the rectangle?", answer:2*w+2*h, key:"perimRect", visual:rectVisual(w,h,w,h), hint:`Perimeter = all the way around: ${w} + ${h} + ${w} + ${h} = 2 × ${w} + 2 × ${h}.`, explain:`2 × ${w} + 2 × ${h} = ${2*w+2*h}`}; }
+    if(t===1){ const s=ri(2,9); return {text:"What is the perimeter of the square?", answer:4*s, key:"perimSq", visual:rectVisual(s,s,s,s), hint:`A square has 4 equal sides: ${s} + ${s} + ${s} + ${s}.`, explain:`4 × ${s} = ${4*s}`}; }
+    const w=ri(2,6), l=ri(w+1,10), P=2*w+2*l; return {word:true, text:`A fence around a rectangular garden is ${P} feet long. The garden is ${w} feet wide. How long is it?`, answer:l, key:"perimBack", visual:rectVisual(l,w,"?",w),
+      hint:`Two widths use ${w} + ${w} = ${2*w} feet. The rest, ${P} − ${2*w} = ${P-2*w}, is two lengths. Half of ${P-2*w} = ?`, explain:`(${P} − ${2*w}) ÷ 2 = ${l}`};
+  },
+  times23(){ const b=pick([2,3,3]), a=ri(1,12), [x,y]=Math.random()<.5?[a,b]:[b,a];
+    return {text:`${x} × ${y} = ?`, answer:x*y, key:`${Math.min(x,y)}x${Math.max(x,y)}`, hint:`Count by ${b}s, ${a} times: ${[...Array(a)].map((_,i)=>b*(i+1)).join(", ")}`, hintVis: a<=6?groupsVisual(a,b,"●"):"", explain:`${x} × ${y} = ${x*y}`}; },
+  halves(){ const t=ri(0,2), n=pick([2*ri(5,15),10*ri(2,20),2*ri(16,50)]);
+    if(t===0) return {text:`${n} ÷ 2 = ?`, answer:n/2, key:"half", hint:`÷ 2 means half. Which number + itself = ${n}?`, explain:`${n/2} + ${n/2} = ${n}`};
+    if(t===1) return {text:`X + X = ${n}\nX = ?`, answer:n/2, key:"xPlusX", hint:`X + X is double X. Half of ${n} is…`, explain:`${n/2} + ${n/2} = ${n}`};
+    const m=ri(10,40), x=ri(5,30); return {text:`${m} + X + X = ${m+2*x}\nX = ?`, answer:x, key:"xPlusX", hint:`Take away ${m} first: X + X = ${2*x}. Then half.`, explain:`X + X = ${2*x}, X = ${x}`}; },
+  share(){ const d=pick([2,3,4,5]), q=ri(2,10), n=d*q, th=pick(["cookies","stickers","grapes","crayons"]);
+    if(Math.random()<.5) return {text:`${n} ÷ ${d} = ?`, answer:q, key:`div${d}`, visual:groupsVisual(d,0,"").replace(/&nbsp;/g,""), hint:`Share ${n} into ${d} equal groups. How many ${d}s make ${n}? Count by ${d}s.`, explain:`${d} × ${q} = ${n}`};
+    return {word:true, text:`${n} ${th} are shared equally among ${d} friends. How many does each friend get?`, answer:q, key:`div${d}`, hint:`${d} × ? = ${n}. Count by ${d}s: ${[...Array(q)].map((_,i)=>d*(i+1)).join(", ")}`, explain:`${n} ÷ ${d} = ${q}`}; },
+  rates(){ const t=ri(0,3);
+    if(t===0){ const r=ri(2,5), m=ri(2,6); return {word:true, text:`A tortoise takes ${r} breaths every minute. How many breaths in ${m} minutes?`, answer:r*m, key:"rate", hint:`${m} groups of ${r}: ${Array(m).fill(r).join(" + ")}`, explain:`${m} × ${r} = ${r*m}`}; }
+    if(t===1){ const p=ri(2,4), n=ri(3,9); return {word:true, text:`Martin puts ${p} candy canes on each window. How many candy canes for ${n} windows?`, answer:p*n, key:"rate", hint:`${n} groups of ${p}.`, explain:`${n} × ${p} = ${p*n}`}; }
+    if(t===2){ const e=pick([2,3,5]), q=ri(2,6), tot=e*q; return {word:true, text:`Dishita makes a paper airplane every ${e} minutes. How many airplanes in ${tot} minutes?`, answer:q, key:"rateDiv", hint:`Count by ${e}s until ${tot}: ${[...Array(q)].map((_,i)=>e*(i+1)).join(", ")}. How many hops?`, explain:`${tot} ÷ ${e} = ${q}`}; }
+    const d=ri(3,9); return {word:true, text:`Each doll has 2 roses. Each rose has 2 leaves. How many leaves on ${d} dolls?`, answer:d*4, key:"rate2", hint:`Roses: ${d} × 2 = ${d*2}. Leaves: ${d*2} × 2 = ${d*4}.`, explain:`${d} × 2 × 2 = ${d*4}`}; },
+  distrib(){ const m=pick([2,3]), s=10*ri(2,4), a=ri(11,s-1), b=s-a; const sum=a+b;
+    return {text:`(${a} + ${b}) × ${m} = ?`, answer:sum*m, key:"distrib", hint:`Parentheses first: ${a} + ${b} = ${sum}. Then ${sum} × ${m} = ${Array(m).fill(sum).join(" + ")}.`, explain:`${sum} × ${m} = ${sum*m}`}; }
+});
+function numberLineRange(lo,hi,n){
+  const W=520,pad=30,x=v=>pad+(v-lo)*(W-2*pad)/(hi-lo), mid=(lo+hi)/2;
+  return `<svg width="100%" style="max-width:${W}px" viewBox="0 0 ${W} 90"><line x1="${pad}" y1="50" x2="${W-pad}" y2="50" stroke="#2b2350" stroke-width="3"/>
+   ${[lo,mid,hi].map(v=>`<line x1="${x(v)}" y1="40" x2="${x(v)}" y2="60" stroke="#2b2350" stroke-width="3"/><text x="${x(v)}" y="82" text-anchor="middle" font-size="16" font-weight="${v===mid?400:900}">${v}</text>`).join("")}
+   <circle cx="${x(n)}" cy="50" r="9" fill="#ff6b6b"/><text x="${x(n)}" y="28" text-anchor="middle" font-size="18" font-weight="900" fill="#ff6b6b">${n}</text></svg>`;
+}
+WORLDS.push(
+  {name:"Robot Rule Lab", e:"🤖", color:"#d4f1ff", boss:"🦾", bossName:"Mega Bot 3000", story:"Grade 2! Crack the robots' secret rules and find the smart shortcuts."},
+  {name:"Hundreds Harbor", e:"⚓", color:"#ffe0cc", boss:"🦈", bossName:"Captain Shark", story:"Big ships carry big numbers. Sail through the hundreds!"},
+  {name:"Multiply Moon", e:"🌙", color:"#e2dcff", boss:"👽", bossName:"Moon Muncher", story:"On the Moon everything comes in groups. Multiply and share to win!"}
+);
+LEVELS.push(
+  {w:5,name:"Guess my rule",e:"🤖",gen:["guessRule"]},{w:5,name:"Easiest way",e:"🧠",gen:["smart"]},{w:5,name:"Hundreds, tens, ones",e:"💯",gen:["place3"]},
+  {w:5,name:"Number riddles",e:"🕵️",gen:["riddle"]},{w:5,name:"Odd or even",e:"⚖️",gen:["oddEven"]},{w:5,name:"Biggest & smallest",e:"📏",gen:["bigSmall"]},
+  {w:5,name:"Boss!",e:"🦾",gen:["guessRule","smart","place3","riddle","bigSmall"],boss:true},
+  {w:6,name:"3-digit add",e:"⛵",gen:["col3Add"]},{w:6,name:"3-digit take away",e:"🛟",gen:["col3Sub"]},{w:6,name:"Rounding",e:"🎯",gen:["rounding"]},
+  {w:6,name:"Think of a number",e:"💭",gen:["thinkNum"]},{w:6,name:"Compare smartly",e:"🐊",gen:["compareSmart"]},{w:6,name:"Mystery bags",e:"🎒",gen:["bagEq"]},
+  {w:6,name:"Perimeter",e:"📐",gen:["perimeter"]},
+  {w:6,name:"Boss!",e:"🦈",gen:["col3Add","col3Sub","thinkNum","bagEq","perimeter"],boss:true},
+  {w:7,name:"× 2 and × 3",e:"✖️",gen:["times23"]},{w:7,name:"Halves & doubles",e:"🌗",gen:["halves"]},{w:7,name:"Share equally",e:"🍪",gen:["share"]},
+  {w:7,name:"Groups & rates",e:"🐢",gen:["rates"]},{w:7,name:"( ) then ×",e:"🫧",gen:["distrib"]},
+  {w:7,name:"FINAL BOSS!",e:"👽",gen:["times23","halves","share","rates","distrib"],boss:true}
+);
+Object.assign(SKILL_NAMES,{guessRule:"Guess my rule",smart:"Computing the easiest way",place3:"Hundreds, tens & ones",riddle:"Number riddles",oddEven:"Odd or even",bigSmall:"Largest/smallest numbers",
+  col3Add:"3-digit addition",col3Sub:"3-digit subtraction",rounding:"Rounding",thinkNum:"Think of a number (working backwards)",compareSmart:"Comparing without calculating",bagEq:"Balance with many weights",
+  perimeter:"Perimeter",times23:"× 2 and × 3",halves:"Halves, doubles, X + X",share:"Sharing equally (÷)",rates:"Groups & rate problems",distrib:"( ) then ×"});
+Object.assign(LESSONS,{
+  guessRule:{t:"Guess my rule",v:()=>machineVisual([[2,12],[5,15],[9,19]]),x:"The robot does the SAME thing to every number. 2 ➜ 12, 5 ➜ 15: it adds 10! Find the rule, then use it."},
+  smart:{t:"The easiest way",v:()=>'<span style="font-size:36px;font-weight:900">82 − 15 + 8</span>',x:"Look for friends that make round numbers! 82 + 8 = 90 first, then 90 − 15 = 75. Much easier!"},
+  place3:{t:"Hundreds, tens, ones",v:()=>'<span style="font-size:36px;font-weight:900">562 = 500 + 60 + 2</span>',x:"In 562, the 5 means 5 hundreds, the 6 means 6 tens (60) and the 2 means 2 ones."},
+  riddle:{t:"Number riddles",v:()=>'<span style="font-size:60px">🕵️</span>',x:"Read each clue slowly. Find the tens digit first, then the ones digit, then put them together."},
+  oddEven:{t:"Odd or even",v:()=>'<span style="font-size:32px;font-weight:900">odd + odd = even<br>odd + even = odd<br>even + even = even</span>',x:"You don't need to add! Just look at the last digit of each number."},
+  bigSmall:{t:"Biggest & smallest",v:()=>'<span style="font-size:30px;font-weight:900">9 · 10 · 99 · 100 · 999</span>',x:"Largest one-digit: 9. Smallest two-digit: 10. Largest two-digit: 99. Smallest three-digit: 100. Largest three-digit: 999."},
+  col3Add:{t:"3-digit addition",v:()=>renderColumn({col:{top:247,bot:165,op:"+",res:412,carry:["1","1",""]}},"412",true),x:"Ones first: 7 + 5 = 12, write 2 carry 1. Tens: 4 + 6 + 1 = 11, write 1 carry 1. Hundreds: 2 + 1 + 1 = 4."},
+  col3Sub:{t:"Borrowing across zero",v:()=>renderColumn({col:{top:801,bot:45,op:"−",res:756}},"756"),x:"801 − 45: 1 − 5? Borrow! The tens is 0, so borrow from the hundreds: 8 hundreds becomes 7, the tens becomes 9, the ones becomes 11."},
+  rounding:{t:"Rounding",v:()=>numberLineRange(140,150,147),x:"147 is closer to 150 than 140. Rule: if the next digit is 5 or more, round UP. Less than 5, round DOWN."},
+  thinkNum:{t:"Think of a number",v:()=>'<span style="font-size:32px;font-weight:900">? ➜ +15 ➜ 100</span>',x:"Work BACKWARDS and do the opposite: +15 becomes −15. 100 − 15 = 85. That was the number!"},
+  compareSmart:{t:"Compare without calculating",v:()=>'<span style="font-size:32px;font-weight:900">54 + 24 ⬜ 56 + 23</span>',x:"56 is 2 more than 54, and 23 is only 1 less than 24. So the right side is bigger: <"},
+  bagEq:{t:"Mystery bags",v:()=>balanceWide("3 + X + 2","13 + 7"),x:"Both sides weigh the same. Right: 13 + 7 = 20. Left without X: 3 + 2 = 5. So X = 20 − 5 = 15."},
+  perimeter:{t:"Perimeter",v:()=>rectVisual(5,3,5,3),x:"Perimeter is the distance all the way around. 5 + 3 + 5 + 3 = 16, or 2 × 5 + 2 × 3."},
+  times23:{t:"× 2 and × 3",v:()=>groupsVisual(4,3,"●"),x:"4 × 3 means 4 groups of 3: 3, 6, 9, 12. Skip count!"},
+  halves:{t:"Halves & doubles",v:()=>'<span style="font-size:34px;font-weight:900">X + X = 20 → X = 10</span>',x:"Doubling is adding a number to itself. Half undoes doubling: half of 20 is 10."},
+  share:{t:"Share equally",v:()=>groupsVisual(3,4,"🍪"),x:"12 cookies shared by 3 friends: each gets 4, because 3 × 4 = 12. We write 12 ÷ 3 = 4."},
+  rates:{t:"Groups & rates",v:()=>'<span style="font-size:50px">🐢 4 / minute</span>',x:"4 breaths every minute, for 3 minutes: 4 + 4 + 4 = 12. Same amount each time means multiply!"},
+  distrib:{t:"( ) then ×",v:()=>'<span style="font-size:34px;font-weight:900">(14 + 6) × 3 = 20 × 3 = 60</span>',x:"Parentheses first! 14 + 6 = 20. Then 20 × 3 = 20 + 20 + 20 = 60."}
+});
+
 const STICKERS = ["🦄","🐼","🦊","🐯","🐨","🐸","🦋","🐳","🦁","🐧","🌈","🍩","🧁","🍉","🚀","🎸","🏆","💎","🌻","🐙","🦕","🎠","🪐","🍭","🐬","🦩","🐝","🎨","🧸","👑","🦒","🐢","🌮","🎡","🏰","🍦","⚽","🎮","🐞","🦔"];
 const CHEERS = ["Awesome!","Super!","You got it!","Brilliant!","Wow!","Math star!","Amazing!","Yes!!","Genius!","On fire!","Boom!","Perfect!"];
 const QPL = 8;
@@ -1053,7 +1224,7 @@ function buildPad(){
 }
 function press(k){
   if(!G||!G.q||G.q.choices||G.locked||$("gotItBtn").style.display!=="none") return;
-  const max = G.q.col ? (G.q.col.hide?1:String(G.q.col.res).length) : 3;
+  const max = G.q.col ? (G.q.col.hide?1:String(G.q.col.res).length) : 4;
   if(k==="⌫"){ G.input=G.input.slice(0,-1); sfx.tap(); }
   else if(k==="✓"){ if(G.input!=="") submit(G.input); return; }
   else if(G.input.length<max){ G.input = (G.input==="0" ? "" : G.input) + k; sfx.tap(); }
@@ -1267,6 +1438,7 @@ function renderSync(){
 
 window.addEventListener("resize",()=>{ const k=window.innerWidth>900?3:window.innerWidth>520?2:1; if(k!==buildPad.w) buildPad(); });
 function boot(){
+  fixUnlocked();
   applyTheme(); buildPad();
   if(!S.familyOk){ show("lock"); return; }
   renderWelcome(); show(S.name && S.petName ? "map" : "welcome");
