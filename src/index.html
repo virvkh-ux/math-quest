@@ -1408,7 +1408,8 @@ async function syncNow(){
       if(!S.syncJoined){ const keep={}; LOCAL_ONLY.forEach(k=>keep[k]=S[k]); S=Object.assign(fresh(),remote,keep); } else S=mergeSaves(S,remote);
       S.syncJoined=true;
       try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){}
-      if(JSON.stringify(S)!==before && $("map").classList.contains("active")) renderMap(); }
+      if(JSON.stringify(S)!==before && $("map").classList.contains("active")) renderMap();
+      if($("welcome").classList.contains("active") && S.name && S.petName){ applyTheme(); show("map"); } }
     if(!g.ok && g.status!==404) throw new Error("get "+g.status);
     S.syncJoined=true;
     const body={fields:{data:{stringValue:JSON.stringify(Object.fromEntries(Object.entries(S).filter(([k])=>!LOCAL_ONLY.includes(k))))}, updatedAt:{integerValue:String(S.updatedAt||Date.now())}}};
