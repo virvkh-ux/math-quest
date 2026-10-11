@@ -197,6 +197,7 @@ textarea{width:100%;height:80px;font-size:12px;border-radius:12px;border:2px sol
     <div class="pick" id="petPick"></div>
     <input class="name-input" id="petName" maxlength="12" placeholder="Name your pet" style="font-size:22px">
     <button class="big-btn green" id="startBtn" style="margin-top:8px">Let's go! ▶</button>
+    <button class="small-btn" id="privBtn" style="margin-top:6px;font-size:14px">🔒 Privacy</button>
     <div style="margin-top:10px;border-top:2px dashed #e3ddff;padding-top:10px;text-align:center;width:100%">
       <button class="small-btn" id="contBtn" style="white-space:normal;max-width:100%">🔄 Already playing on another device? Continue my progress</button>
       <div id="contBox" style="display:none;margin-top:8px">
@@ -331,7 +332,7 @@ textarea{width:100%;height:80px;font-size:12px;border-radius:12px;border:2px sol
 <section class="screen" id="shop">
   <div class="topbar"><button class="small-btn" data-go="map">⬅ Map</button><h2>Pet Shop</h2><div class="pill" id="shopCoins"></div></div>
   <div class="pet-panel" style="justify-content:center"><div class="pet" id="shopPet"></div></div>
-  <h3>👗 My wardrobe</h3><div class="grid-items" id="shopOutfits"></div>
+  <div id="wardrobeSec"><h3>👗 My wardrobe</h3><div class="grid-items" id="shopOutfits"></div></div>
   <h3>Things for your pet</h3><div class="grid-items" id="shopAcc"></div>
   <h3>World colors</h3><div class="grid-items" id="shopThemes"></div>
 </section>
@@ -359,9 +360,12 @@ textarea{width:100%;height:80px;font-size:12px;border-radius:12px;border:2px sol
     <div id="missedList" style="font-size:18px"></div>
     <h3>Daily play limit</h3>
     <div class="row" style="justify-content:flex-start" id="limitBtns"></div>
-    <h3>☁️ Sync between devices</h3>
-    <div id="syncBox" style="font-size:16px;font-weight:600;line-height:1.7"></div>
-    <h3>Move progress by hand (backup code)</h3>
+    <div id="syncSec"><h3>☁️ Sync between devices</h3>
+    <div id="syncBox" style="font-size:16px;font-weight:600;line-height:1.7"></div></div>
+    <h3>Back up progress</h3>
+    <div class="row" style="justify-content:flex-start"><button class="small-btn" id="saveFileBtn">💾 Save backup file</button><button class="small-btn" id="loadFileBtn">📂 Restore from file</button><input type="file" id="loadFile" accept=".json,application/json" style="display:none"></div>
+    <div style="font-size:14px;color:var(--soft);margin:4px 0 8px">Progress is saved in this browser on this device. Clearing browser data erases it, so save a backup file now and then.</div>
+    <h3>Or move it with a backup code</h3>
     <div class="row" style="justify-content:flex-start"><button class="small-btn" id="exportBtn">Show backup code</button><button class="small-btn" id="importBtn">Restore from code</button></div>
     <textarea id="backupBox" placeholder="Backup code appears here, or paste one to restore" style="margin-top:8px"></textarea>
     <h3>Settings</h3>
@@ -380,6 +384,13 @@ textarea{width:100%;height:80px;font-size:12px;border-radius:12px;border:2px sol
   <div class="row" style="margin-top:12px"><button class="small-btn" id="gateCancel">Cancel</button><button class="small-btn" id="gateOk" style="background:var(--good);color:#fff">Enter</button></div>
 </div></div>
 
+<div class="modal" id="privModal"><div class="card" style="max-width:520px;font-size:17px;line-height:1.5">
+  <h2>🔒 Privacy</h2>
+  <p>Math Quest has no accounts and no ads. Your child's name, progress and play statistics are stored <b>only in this browser on this device</b>. Nothing is sent to us or anyone else.</p>
+  <p id="privSync">If a grown-up turns on the optional device sync, progress is also kept in a private cloud save that only someone with your sync code can open.</p>
+  <p>To erase everything: Grown-ups corner → Reset all progress, or clear this site's data in your browser.</p>
+  <div style="text-align:center"><button class="big-btn green" id="privOk">OK</button></div>
+</div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -399,8 +410,10 @@ var LOCAL_ONLY = ["familyOk","sound","music","playDay","playMs","syncKey","syncJ
 var syncTok=null, syncTimer=null, syncBusy=false;
 
 /* ============ save data ============ */
-const KEY = "mathquest.v2";
-const fresh = () => ({name:"", avatar:"hero:girl", outfit:"cruise", pet:"dragon", petName:"", acc:"", theme:"", owned:[], stars:{}, unlocked:1, coins:0, xp:0,
+const EDITION = "family";   // "public" in the generated play/ build (scripts/build_public.py)
+const PUB = EDITION==="public";
+const KEY = PUB ? "mathquest.public.v1" : "mathquest.v2";
+const fresh = () => ({name:"", avatar:PUB?"🦄":"hero:girl", outfit:"cruise", pet:"dragon", petName:"", acc:"", theme:"", owned:[], stars:{}, unlocked:1, coins:0, xp:0,
   stickers:[], stats:{}, missed:{}, sound:true, music:true, chest:"", seenLesson:{}, familyOk:false, limit:0, playDay:"", playMs:0, history:{}, ux:{q:{},quits:{},scratch:0,hint:0,stuck:0}, lastStage:0, pro:false});
 let S;
 try { S = Object.assign(fresh(), JSON.parse(localStorage.getItem(KEY) || "{}")); } catch(e){ S = fresh(); }
@@ -410,7 +423,7 @@ const save = () => { S.updatedAt = Date.now(); try { localStorage.setItem(KEY, J
 const params = new URLSearchParams(location.search);
 if(params.get("code") && hash(params.get("code").trim().toUpperCase())===FAMILY_HASH){ S.familyOk = true; save(); }
 if(params.get("name") && !S.name) S.name = params.get("name").slice(0,14);
-if(params.get("sync") && /^[A-Z0-9-]{20,40}$/i.test(params.get("sync"))) { if(S.syncKey!==params.get("sync").toUpperCase()){ S.syncKey = params.get("sync").toUpperCase(); S.syncJoined=false; } }
+if(!PUB && params.get("sync") && /^[A-Z0-9-]{20,40}$/i.test(params.get("sync"))) { if(S.syncKey!==params.get("sync").toUpperCase()){ S.syncKey = params.get("sync").toUpperCase(); S.syncJoined=false; } }
 
 /* ============ sound ============ */
 let AC = null;
@@ -477,6 +490,7 @@ function say(text){
   }catch(e){}
 }
 
+/*@FAMILY_START*/
 /* ============ hero: same cartoon face, many outfits (wardrobe) ============ */
 const SKIN="#f1c7a6", FACE="#f6d1b3", HAIR="#2b1d17";
 const OUTFITS = {
@@ -594,6 +608,7 @@ function heroOutfitSVG(id, full){
 
 function heroSVG(full){ return heroOutfitSVG(S.outfit||"cruise", full); }
 function avatarHTML(a, full){ return a==="hero:girl" ? heroSVG(full) : a; }
+/*@FAMILY_END*/
 
 /* ============ pets, shop, ranks ============ */
 const PETS = {
@@ -871,7 +886,7 @@ const LESSONS = {
   times2:{t:"× 3, 4, 5",v:()=>'<span style="font-size:32px;font-weight:900">5, 10, 15, 20, 25…</span>',x:"Count by 5s like a clock! For × 3 and × 4, skip count too: 4, 8, 12, 16…"},
   missFactor:{t:"Missing factor",v:()=>groupsVisual(4,5,"●"),x:"4 × ? = 20. How many hops of 4 make 20? 4, 8, 12, 16, 20 — five hops! ? = 5."}
 };
-/* ===== Grade 2 (RSM Grade 2 Advanced) generators ===== */
+/* ===== Grade 2 generators ===== */
 function balanceWide(left,right){
   return `<svg width="360" height="161" style="max-width:100%;height:auto" viewBox="0 0 380 170"><polygon points="190,60 170,160 210,160" fill="#9a8cff"/><rect x="20" y="52" width="340" height="8" rx="4" fill="#7c5cff"/>
   <line x1="80" y1="60" x2="80" y2="96" stroke="#7c5cff" stroke-width="3"/><line x1="300" y1="60" x2="300" y2="96" stroke="#7c5cff" stroke-width="3"/>
@@ -1063,7 +1078,7 @@ $("codeBtn").onclick = ()=>{
 $("codeIn").addEventListener("keydown",e=>{ if(e.key==="Enter") $("codeBtn").click(); });
 
 /* welcome */
-const AVATARS=["hero:girl","🦄","🐱","🐶","🐰","🦊","🐼","🐯","👸","🧚","🦸‍♀️","🧜‍♀️","🐬"];
+const AVATARS=(PUB?[]:["hero:girl"]).concat(["🦄","🐱","🐶","🐰","🦊","🐼","🐯","👸","🧚","🦸‍♀️","🧜‍♀️","🐬"]);
 function renderWelcome(){
   $("welcomeHero").innerHTML = S.avatar==="hero:girl" ? heroSVG(true) : "";
   $("nameInput").value=S.name; $("petName").value=S.petName;
@@ -1543,7 +1558,17 @@ function renderSync(){
 }
 
 window.addEventListener("resize",()=>{ const k=window.innerWidth>900?3:window.innerWidth>520?2:1; if(k!==buildPad.w) buildPad(); });
+$("saveFileBtn").onclick=()=>{ try{ const blob=new Blob([JSON.stringify(S)],{type:"application/json"}), a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download=`math-quest-backup-${today()}.json`; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500); toast("Saved! 💾","#22b573"); }catch(e){ toast("Couldn't save","#ff6b6b"); } };
+$("loadFileBtn").onclick=()=>$("loadFile").click();
+$("loadFile").onchange=e=>{ const f=e.target.files[0]; if(!f) return; const r=new FileReader();
+  r.onload=()=>{ try{ const d=JSON.parse(r.result); if(!d||typeof d!=="object"||!("stars" in d)) throw 0; const keep={familyOk:true,syncKey:S.syncKey,syncJoined:S.syncJoined}; S=Object.assign(fresh(),d,keep); save(); toast("Restored! 🎉","#22b573"); renderParent(); }catch(err){ toast("That file didn't work","#ff6b6b"); } e.target.value=""; };
+  r.readAsText(f); };
+$("privBtn").onclick=()=>{ $("privSync").style.display=PUB?"none":""; $("privModal").classList.add("show"); };
+$("privOk").onclick=()=>$("privModal").classList.remove("show");
+if(PUB){ ["wardrobeSec","syncSec","welcomeHero"].forEach(id=>{ const el=$(id); if(el) el.style.display="none"; }); const cb=$("contBtn"); if(cb) cb.parentElement.style.display="none"; }
 function boot(){
+  if(PUB) S.familyOk=true;
   fixUnlocked();
   applyTheme(); buildPad();
   if(!S.familyOk){ show("lock"); return; }

@@ -14,6 +14,9 @@ Runs fully offline in a Microsoft Edge app window. Progress saves automatically 
 - iPad / Android: open https://virvkh-ux.github.io/math-quest/ in Safari/Chrome, then Share -> "Add to Home Screen". Works offline after the first visit.
 - First open on each device asks for the family code (kept out of this repo). Progress is per device; use Grown-ups corner -> backup code to move it.
 
+## Public edition (for other families)
+https://virvkh-ux.github.io/math-quest/play/ (no family code, progress saved only in the browser on that device, backup file in Grown-ups corner, no network calls). Built from src/ with `python scripts/build_public.py`.
+
 ## Worlds (55 levels)
 1. Ten Town - bonds to 10, add/subtract within 10
 2. Twenty Forest - make-a-10, within 20, fact families, compare
